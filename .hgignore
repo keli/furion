@@ -1,0 +1,7 @@
+# use glob syntax.
+syntax: glob
+
+furion.cfg
+build/
+xcuserdata/
+*.pyc
