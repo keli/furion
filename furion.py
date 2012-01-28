@@ -33,6 +33,3 @@ if __name__ == "__main__":
         svr.server_close()
         sys.exit()
 
-    except:
-        pass
-    
