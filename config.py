@@ -53,6 +53,7 @@ auth_plugin =
         self.pem_path = self.config.get('main', 'pem_path')
         if self.pem_path and not exists(self.pem_path):
             print 'Fatal error: pem "%s" cannot be found.' % self.pem_path
+            time.sleep(3)
             sys.exit(-1)
 
 

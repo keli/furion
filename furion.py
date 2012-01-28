@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 
 import sys
+import time
+from os.path import exists
 from socks5 import *
 from config import FurionConfig
 
 if __name__ == "__main__":    
     try:
+        if not exists('furion.cfg'):
+            print "Fatal error: furion.cfg is not found, exiting..."
+            time.sleep(3)
+            sys.exit(-1)
+
         FurionConfig.init('furion.cfg')
         class FurionHandler(Socks5RequestHandler, FurionConfig): pass
         
