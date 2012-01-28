@@ -94,7 +94,10 @@ class SecureTCPServer(SocketServer.TCPServer):
     def __init__(self, pem_path, server_address, handler_class):
         SocketServer.BaseServer.__init__(self, server_address, handler_class)
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        af, socktype, proto, canonname, sa = socket.getaddrinfo(
+            self.server_address[0], self.server_address[1], 0, socket.SOCK_STREAM)[0]
+        sock = socket.socket(af, socktype, proto)
+        #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(TIME_OUT)
 
         # Don't do handshake on connect for ssl (which will block http://bugs.python.org/issue1251)
