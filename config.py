@@ -1,7 +1,9 @@
 from __future__ import with_statement
 
 import time
-import socket
+import sys
+
+from os.path import exists
 
 from StringIO import StringIO
 import ConfigParser
@@ -49,6 +51,10 @@ auth_plugin =
         self.local_ssl = self.config.getboolean('main', 'local_ssl')
         self.local_auth = self.config.getboolean('main', 'local_auth')
         self.pem_path = self.config.get('main', 'pem_path')
+        if self.pem_path and not exists(self.pem_path):
+            print 'Fatal error: pem "%s" cannot be found.' % self.pem_path
+            sys.exit(-1)
+
 
         self.upstream_ip = self.config.get('upstream', 'upstream_ip')
         self.upstream_port = self.config.getint('upstream', 'upstream_port')
