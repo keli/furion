@@ -267,7 +267,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
 
                         except Exception, e:
                             log.debug('Error when trying to resolve/connect to: %s, reason: %s', (domain, port), e)
-                            traceback.print_exc()
+                            #traceback.print_exc()
                             self.request.sendall('\x05\x01')
                             raise
 

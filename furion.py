@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
+import sys
 from socks5 import *
 from config import FurionConfig
-from multiprocessing import Process
-
 
 if __name__ == "__main__":    
     try:
@@ -15,10 +14,6 @@ if __name__ == "__main__":
         else:
             svr = Socks5Server(FurionConfig.local_addr, FurionHandler)
         
-        svr_proc = Process(target=svr.serve_forever)
-        svr_proc.daemon = True
-        svr_proc.start()
-
         print '=' * 78
         print "Furion server listening on %s, SSL %s, AUTH %s." % \
             (FurionConfig.local_addr, \
@@ -31,12 +26,12 @@ if __name__ == "__main__":
             "ON" if FurionConfig.upstream_auth else "OFF")
         print '=' * 78
         
-        svr_proc.join()        
+        svr.serve_forever()
         
     except KeyboardInterrupt:
         print "Exiting..."
         svr.server_close()
-        svr_proc.terminate()
+        sys.exit()
 
     except:
         pass
