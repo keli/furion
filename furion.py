@@ -37,4 +37,7 @@ if __name__ == "__main__":
         print "Exiting..."
         svr.server_close()
         svr_proc.terminate()
+
+    except:
+        pass
     
