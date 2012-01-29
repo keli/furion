@@ -23,6 +23,14 @@ def make_connection(addr, bind_to=None):
                 client.close()
     raise e
 
+# Some versions of windows don't have socket.inet_pton
+if hasattr(socket, 'inet_pton'):
+    def my_inet_aton(ip_string):
+        af, _, _, _, _ = socket.getaddrinfo(ip_string, 80, 0, socket.SOCK_STREAM)[0]
+        return socket.inet_pton(af, ip_string)
+else:
+    my_inet_aton = socket.inet_aton
+
 def hexstring(s):
     return ' '.join(['%02X' % ord(c) for c in s])
     

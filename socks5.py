@@ -14,7 +14,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from Queue import Queue
 from types import *
 
-from helpers import log, make_connection
+from helpers import log, make_connection, my_inet_aton
 
 ####################################
 ## Constants
@@ -268,26 +268,29 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                                 log.info("Connecting to %s.", domain)
                                 dest = make_connection((domain, port), my_ip)
 
+                            # Connected to upstream/destination
+                            client_ip, client_port = dest.getsockname()
+                            ip_bytes = my_inet_aton(client_ip)                            
+                            port_bytes = struct.pack('!H', client_port)
+                            self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
+                                
+                            stage = CONN_ACCEPTED
+
                         except Exception, e:
                             log.debug('Error when trying to resolve/connect to: %s, reason: %s', (domain, port), e)
                             #traceback.print_exc()
                             self.request.sendall('\x05\x01')
                             raise
 
-
-                        # Connected to upstream/destination
-                        client_ip, client_port = dest.getsockname()
-                        ip_bytes = socket.inet_pton(socket.AF_INET, client_ip)
-                        port_bytes = struct.pack('!H', client_port)
-                        self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
-                                
-                        stage = CONN_ACCEPTED
                         
             # Starting to forward data
             try:
                 self.forward(self.request, dest)
             except Socks5Exception, e:
                 log.debug("Forwarding finished: %s", e)
+            except Exception, e:
+                log.debug('Error when forwarding: %s', e)
+                #traceback.print_exc()
             finally:
                 dest.close()
                 log.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out, self.bytes_in, self.client_name, self.server_name)
@@ -295,6 +298,9 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                     self.authority.usage(self.member_id, self.bytes_in + self.bytes_out)
         except Socks5Exception, e:
             log.debug("Connection closed. Reason: %s", e)
+        except Exception, e:
+            log.debug('Error when proxying: %s', e)
+            #traceback.print_exc()
         finally:
             try:
                 self.request.shutdown(socket.SHUT_RDWR)
