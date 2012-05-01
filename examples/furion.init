@@ -1,0 +1,31 @@
+#!/bin/bash
+
+ulimit -s 256
+CHDIR=/usr/local/furion
+DAEMON=/usr/local/furion/furion.py
+PIDFILE=/var/run/furion.pid
+
+case "$1" in
+  start)
+    echo "Starting server"
+    /sbin/start-stop-daemon --start --pidfile $PIDFILE \
+        --user root --group root \
+        -b --make-pidfile \
+        --chdir $CHDIR \
+        --exec $DAEMON
+    ;;
+  stop)
+    echo "Stopping server"
+    /sbin/start-stop-daemon --stop --pidfile $PIDFILE --verbose
+    ;;
+  restart)
+    echo "Restarting server"
+    $0 stop && $0 start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/furion {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0
