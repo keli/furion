@@ -90,7 +90,7 @@ class SecureTCPServer(SocketServer.TCPServer):
     """TCP server with SSL"""
     
     allow_reuse_address = True
-    
+
     def __init__(self, pem_path, server_address, handler_class):
         SocketServer.BaseServer.__init__(self, server_address, handler_class)
 
@@ -137,8 +137,8 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
 
 class Socks5Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """Threading Socks5 server"""
-    pass
-    
+    allow_reuse_address = True
+
 class TPSocks5Server(ThreadPoolMixIn, SocketServer.TCPServer):
     """Thread Pool Socks5 server"""
     pass
@@ -257,7 +257,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             # Connect to upstream instead of destination
                             if self.upstream_addr:
                                 sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password, data)
-                                log.info("Connecting to %s via upstream.", domain)
+                                log.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
                                 dest = sc.connect()
 
                             # Connect to destination directly

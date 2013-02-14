@@ -12,6 +12,8 @@ from simpleauth import SimpleAuth
 
 class FurionConfig(object):
 
+    last_update = 0
+
     @classmethod
     def init(self, path):
 
@@ -24,6 +26,7 @@ pem_path =
 local_auth = off
 
 [upstream]
+upstream_servers = 
 upstream_ip =
 upstream_port = 443
 upstream_ssl = on
@@ -57,6 +60,7 @@ auth_plugin =
             sys.exit(-1)
 
 
+        self.upstream_servers = self.config.get('upstream', 'upstream_servers')
         self.upstream_ip = self.config.get('upstream', 'upstream_ip')
         self.upstream_port = self.config.getint('upstream', 'upstream_port')
         self.upstream_ssl = self.config.getboolean('upstream', 'upstream_ssl')
