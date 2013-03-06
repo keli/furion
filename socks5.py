@@ -269,7 +269,9 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                                 dest = make_connection((domain, port), my_ip)
 
                             # Connected to upstream/destination
-                            client_ip, client_port = dest.getsockname()
+                            dsockname = dest.getsockname()
+                            client_ip = dsockname[0]
+                            client_port = dsockname[1]
                             ip_bytes = my_inet_aton(client_ip)                            
                             port_bytes = struct.pack('!H', client_port)
                             self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
@@ -342,7 +344,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                     
 class Socks5Client:
     """A socks5 client with optional SSL support"""
-    def __init__(self, addr, username='', password='', data='', enable_ssl=True, bind_to=None):
+    def __init__(self, addr, username='', password='', data='', enable_ssl=True, bind_to=None, to_upstream=True):
         """
         @param data A tuple of remote address you plan to connect to, or packed data of it.
         """
@@ -352,9 +354,10 @@ class Socks5Client:
         self.password = password
         self.data = data
         self.bind_to = bind_to
+        self.to_upstream = to_upstream
         
     def connect(self):
-        dest = make_connection(self.addr)
+        dest = make_connection(self.addr, self.bind_to, self.to_upstream)
         # SSL enabled
         if self.enable_ssl:
             dest = ssl.wrap_socket(dest)

@@ -14,7 +14,7 @@ UpstreamQueue = Queue(100)
 
 log.basicConfig(level=log.INFO, format='%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
 
-def make_connection(addr, bind_to=None):
+def make_connection(addr, bind_to=None, to_upstream=False):
     """ Make TCP connection and return socket
     """
     domain, port = addr
@@ -33,9 +33,14 @@ def make_connection(addr, bind_to=None):
         except Exception, e:
             if client is not None:
                 client.close()
+            log.debug("Error occurred when making connection to dest: %s", e)
             # initiate an upstream check
-            log.debug("Error occurred when making connection to upstream, rechecking...")
-            NoticeQueue.put_nowait(time.time())
+            if to_upstream:
+                log.debug("Rechecking upstreams...")
+                try:
+                    NoticeQueue.put_nowait(time.time())
+                except:
+                    pass
     raise e
 
 def run_check(cfg):
