@@ -5,7 +5,7 @@ import threading
 from Queue import Queue
 
 MIN_INTERVAL = 10
-CONN_TIMEOUT = 5
+CONN_TIMEOUT = 10
 
 # NoticeQueue is used for triggering an upstream check
 NoticeQueue = Queue(1)
