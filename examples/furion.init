@@ -1,5 +1,14 @@
 #!/bin/bash
 
+### BEGIN INIT INFO
+# Provides:          furion
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Description:       starts and stops the furion server
+### END INIT INFO
+
 ulimit -s 256
 CHDIR=/usr/local/furion
 DAEMON=/usr/local/furion/furion.py
