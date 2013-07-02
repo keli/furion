@@ -262,7 +262,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
 
                             # Connect to destination directly
                             else:
-                                if port not in [80, 443]:
+                                if port not in self.allowed_ports:
                                     raise Socks5SocketError("Port %d not allowed for %s" % (port, username))
                                 my_ip, my_port = self.request.getsockname()
                                 log.info("Connecting to %s.", domain)

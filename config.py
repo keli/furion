@@ -24,6 +24,7 @@ local_port = 11080
 local_ssl = off
 pem_path = 
 local_auth = off
+allowed_ports = 22,80,443
 
 [upstream]
 upstream_servers = 
@@ -58,6 +59,7 @@ auth_plugin =
             print 'Fatal error: pem "%s" cannot be found.' % self.pem_path
             time.sleep(3)
             sys.exit(-1)
+        self.allowed_ports = [int(port) for port in self.config.get('main', 'allowed_ports').strip().split(',')]
 
 
         self.upstream_servers = self.config.get('upstream', 'upstream_servers')
