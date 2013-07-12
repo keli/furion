@@ -36,9 +36,11 @@ for quick installation on Linux/Mac::
 	# Or if you have your own VPS and want to install Furion as server on it
 	sudo bash install.sh server
 
-I've included a few upstream servers which can be used directly 
+The script will try to start Furion and make it runnable at boot. 
+A few upstream servers are also included which can be used directly 
 for people who just want to get things working ASAP. 
-They are just tiny VPS instances, DO NOT ABUSE and force me to shut them down.
+These upstream servers are just tiny VPS instances, 
+DO NOT ABUSE and force me to shut them down.
 
 When running as client Furion opens a socks5 proxy on localhost:11080.
 
@@ -64,7 +66,7 @@ Configure ssh to use "connect" and furion together for bitbucket::
 
 	# Append to the end of .ssh/config
 	Host bitbucket.org
-    ProxyCommand connect -a none -S localhost:11080 %h %p
+	ProxyCommand connect -a none -S localhost:11080 %h %p
 
 Now I can clone code via ssh from bitbucket without problem::
 

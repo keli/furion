@@ -80,6 +80,7 @@ function install {
 			prepare_$1 `date | md5sum | head -c 10`
 			cp -f examples/furion.init /etc/init.d/furion
 			update-rc.d furion defaults
+			service furion start
 			;;
 	esac		
 }
