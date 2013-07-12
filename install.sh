@@ -60,7 +60,7 @@ function prepare_server {
 
 function prepare_client {
 	cd $INSTALL_PATH
-	cp examples/furion.cfg .
+	cp examples/furion_client.cfg .
 }
 
 function install {
