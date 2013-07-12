@@ -9,26 +9,36 @@
 # Description:       starts and stops the furion server
 ### END INIT INFO
 
+. /lib/lsb/init-functions
+
 ulimit -s 256
+
 CHDIR=/usr/local/furion
 DAEMON=/usr/local/furion/furion.py
 PIDFILE=/var/run/furion.pid
 
 case "$1" in
   start)
-    echo "Starting server"
-    /sbin/start-stop-daemon --start --pidfile $PIDFILE \
+    log_daemon_msg "Starting server" "furion" || true
+    if /sbin/start-stop-daemon --start --pidfile $PIDFILE \
         --user root --group root \
         -b --make-pidfile \
         --chdir $CHDIR \
-        --exec $DAEMON
+        --exec $DAEMON; then
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
     ;;
   stop)
-    echo "Stopping server"
-    /sbin/start-stop-daemon --stop --pidfile $PIDFILE --verbose
+    log_daemon_msg "Stopping server" "furion" || true
+    if /sbin/start-stop-daemon --stop --pidfile $PIDFILE; then
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
     ;;
   restart)
-    echo "Restarting server"
     $0 stop && $0 start
     ;;
   *)

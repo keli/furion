@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>hu.keli.furion</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>GroupName</key>
+    <string>wheel</string>
+    <key>UserName</key>
+    <string>root</string>
+    <key>WorkingDirectory</key>
+    <string>/usr/local/furion/</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/furion/furion.py</string>
+    </array>
+  </dict>
+</plist>
