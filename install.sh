@@ -20,9 +20,9 @@ function die {
 }
 
 function print_info {
-	echo -n -e '\e[1;36m'
+	echo -n $'\e[1;36m'
 	echo -n $1
-	echo -e '\e[0m'
+	echo $'\e[0m'
 }
 
 function usage {
@@ -60,11 +60,12 @@ function prepare_server {
 
 function prepare_client {
 	cd $INSTALL_PATH
-	cp examples/furion_client.cfg .
+	cp examples/furion_client.cfg furion.cfg
 }
 
 function install {
 	check_sanity
+	print_info "Installing Furion as $1..."
 	case $OSTYPE in
 		darwin*)
 			download
@@ -83,6 +84,7 @@ function install {
 			service furion start
 			;;
 	esac		
+	print_info "Installation Complete."
 }
 
 [[ $# < 1 ]] && usage
