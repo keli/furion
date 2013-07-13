@@ -9,7 +9,7 @@ function check_sanity {
 	if [[ $(id -u) != "0" ]]; then
 		die 'Must be run by root user'
 	fi
-	if [[ -z `which python` ]]; then
+	if [[ -z $(echo `which python`) ]]; then
 		die "Cannot find python"
 	fi
 }
@@ -35,8 +35,8 @@ EOF
 }
 
 function download {
-	GIT=`which git`
-	HG=`which hg`
+	GIT=$(echo `which git`)
+	HG=$(echo `which hg`)
 
 	if [[ -n $GIT ]]; then
 		git clone https://github.com/hukeli/furion.git $INSTALL_PATH
