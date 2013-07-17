@@ -14,6 +14,25 @@ function check_sanity {
 	fi
 }
 
+function check_install {
+	if [[ -d $INSTALL_PATH ]]; then
+		print_info "Already installed, trying to upgrade..."
+		if [[ -d $INSTALL_PATH/.git ]]; then
+			cd $INSTALL_PATH
+			git fetch
+			print_info "Upgrade finished."
+			exit 0
+		elif [[ -d $INSTALL_PATH/.hg ]]; then
+			cd $INSTALL_PATH
+			hg pull && hg up
+			print_info "Upgrade finished."
+			exit 0
+		else
+			die "Not a git or hg repo, can't upgrade $INSTALL_PATH"
+		fi
+	fi
+}
+
 function die {
 	echo "ERROR:" $1 > /dev/null 1>&2
 	exit 1
@@ -65,6 +84,7 @@ function prepare_client {
 
 function install {
 	check_sanity
+	check_install
 	print_info "Installing Furion as $1..."
 	case $OSTYPE in
 		darwin*)
