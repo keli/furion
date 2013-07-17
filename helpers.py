@@ -55,6 +55,9 @@ def run_check(cfg):
                 addr_tmp = addr.strip().split(':')
                 addr_tmp[1] = int(addr_tmp[1])
                 addr_tuple = tuple(addr_tmp)
+                # set a default upstream if none is set already
+                if not cfg.upstream_addr:
+                    cfg.upstream_addr = addr_tuple
                 t = threading.Thread(target = check_alive, args = (addr_tuple,))
                 t.setDaemon(1)
                 t.start()
