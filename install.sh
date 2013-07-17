@@ -20,16 +20,26 @@ function check_install {
 		if [[ -d $INSTALL_PATH/.git ]]; then
 			cd $INSTALL_PATH
 			git fetch
-			print_info "Upgrade finished."
-			exit 0
 		elif [[ -d $INSTALL_PATH/.hg ]]; then
 			cd $INSTALL_PATH
 			hg pull && hg up
-			print_info "Upgrade finished."
-			exit 0
 		else
-			die "Not a git or hg repo, can't upgrade $INSTALL_PATH"
+			die "Not a git or hg repo, cannot upgrade. Please remove $INSTALL_PATH and try again."
 		fi
+
+		print_info "Restarting service..."
+		case $OSTYPE in
+			darwin*)
+				launchctl unload /Library/LaunchDaemons/hu.keli.furion.plist
+				launchctl load /Library/LaunchDaemons/hu.keli.furion.plist
+				;;
+			linux*)
+				service furion restart
+				;;
+		esac
+			
+		print_info "Upgrade finished."
+		exit 0
 	fi
 }
 
