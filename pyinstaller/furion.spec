@@ -1,14 +1,16 @@
 # -*- mode: python -*-
-a = Analysis([os.path.join(HOMEPATH,'support\\_mountzlib.py'), os.path.join(HOMEPATH,'support\\useUnicode.py'), '..\\furion.py'],
-             pathex=['C:\\furion\\windows'])
+a = Analysis(['..\\furion.py'],
+             pathex=['C:\\furion\\pyinstaller'],
+             hiddenimports=[],
+             hookspath=None)
 pyz = PYZ(a.pure)
-exe = EXE( pyz,
+exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
           name=os.path.join('dist', 'furion.exe'),
-          debug=True,
-          strip=False,
+          debug=False,
+          strip=None,
           upx=True,
           console=True , icon='furion.ico')
