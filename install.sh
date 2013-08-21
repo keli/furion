@@ -19,7 +19,7 @@ function check_install {
 		print_info "Already installed, trying to upgrade..."
 		if [[ -d $INSTALL_PATH/.git ]]; then
 			cd $INSTALL_PATH
-			git fetch
+			git pull
 		elif [[ -d $INSTALL_PATH/.hg ]]; then
 			cd $INSTALL_PATH
 			hg pull && hg up
