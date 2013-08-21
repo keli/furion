@@ -1,3 +1,4 @@
 furion.cfg
+furion.log
 build/*
 *.pyc

@@ -9,12 +9,13 @@ import select
 import socket
 import ssl
 import SocketServer
+import logging
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from Queue import Queue
 from types import *
 
-from helpers import log, make_connection, my_inet_aton
+from helpers import make_connection, my_inet_aton
 
 ####################################
 ## Constants
@@ -226,11 +227,11 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                     
                     if error_code != AUTH_SUCCESSFUL:
                         self.request.sendall('\x01' + error_code)
-                        log.info('Auth failed for user: %s', username)
+                        logging.info('Auth failed for user: %s', username)
                         raise Socks5AuthFailed
                     else:
                         self.request.sendall('\x01\x00')
-                        log.info('Auth succeeded for user: %s', username)
+                        logging.info('Auth succeeded for user: %s', username)
                         stage = FINAL_STAGE
                         
                 # Final stage
@@ -257,7 +258,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             # Connect to upstream instead of destination
                             if self.upstream_addr:
                                 sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password, data)
-                                log.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
+                                logging.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
                                 dest = sc.connect()
 
                             # Connect to destination directly
@@ -265,7 +266,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                                 if port not in self.allowed_ports:
                                     raise Socks5SocketError("Port %d not allowed for %s" % (port, username))
                                 my_ip, my_port = self.request.getsockname()
-                                log.info("Connecting to %s.", domain)
+                                logging.info("Connecting to %s.", domain)
                                 dest = make_connection((domain, port), my_ip)
 
                             # Connected to upstream/destination
@@ -279,7 +280,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             stage = CONN_ACCEPTED
 
                         except Exception, e:
-                            log.debug('Error when trying to resolve/connect to: %s, reason: %s', (domain, port), e)
+                            logging.debug('Error when trying to resolve/connect to: %s, reason: %s', (domain, port), e)
                             #traceback.print_exc()
                             self.request.sendall('\x05\x01')
                             raise
@@ -289,19 +290,19 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
             try:
                 self.forward(self.request, dest)
             except Socks5Exception, e:
-                log.debug("Forwarding finished: %s", e)
+                logging.debug("Forwarding finished: %s", e)
             except Exception, e:
-                log.debug('Error when forwarding: %s', e)
+                logging.debug('Error when forwarding: %s', e)
                 #traceback.print_exc()
             finally:
                 dest.close()
-                log.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out, self.bytes_in, self.client_name, self.server_name)
+                logging.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out, self.bytes_in, self.client_name, self.server_name)
                 if self.local_auth and (self.bytes_in or self.bytes_out):
                     self.authority.usage(self.member_id, self.bytes_in + self.bytes_out)
         except Socks5Exception, e:
-            log.debug("Connection closed. Reason: %s", e)
+            logging.debug("Connection closed. Reason: %s", e)
         except Exception, e:
-            log.debug('Error when proxying: %s', e)
+            logging.debug('Error when proxying: %s', e)
             #traceback.print_exc()
         finally:
             try:

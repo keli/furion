@@ -1,4 +1,4 @@
-import logging as log
+import logging
 import socket
 import time
 import threading
@@ -11,8 +11,6 @@ CONN_TIMEOUT = 10
 NoticeQueue = Queue(1)
 # Alive upstream servers are put into this queue
 UpstreamQueue = Queue(100)
-
-log.basicConfig(level=log.INFO, format='%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s')
 
 def make_connection(addr, bind_to=None, to_upstream=False):
     """ Make TCP connection and return socket
@@ -33,10 +31,10 @@ def make_connection(addr, bind_to=None, to_upstream=False):
         except Exception, e:
             if client is not None:
                 client.close()
-            log.debug("Error occurred when making connection to dest: %s", e)
+            logging.debug("Error occurred when making connection to dest: %s", e)
             # initiate an upstream check
             if to_upstream:
-                log.debug("Rechecking upstreams...")
+                logging.debug("Rechecking upstreams...")
                 try:
                     NoticeQueue.put_nowait(time.time())
                 except:
@@ -49,7 +47,7 @@ def run_check(cfg):
     while True:
         ts = NoticeQueue.get()
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            log.debug("Checking upstream addresses...")
+            logging.debug("Checking upstream addresses...")
             addr_list = cfg.upstream_servers.strip().split(',')
             for addr in addr_list:
                 addr_tmp = addr.strip().split(':')
@@ -69,21 +67,21 @@ def check_alive(addr):
         sock.connect(addr)
         ts = time.time()
         UpstreamQueue.put((ts, addr))
-        log.info("Upstream %s is ALIVE", addr)        
+        logging.info("Upstream %s is ALIVE", addr)        
     except Exception, e:
         if sock is not None:
             sock.close()
-        log.info("Upstream %s is DEAD", addr)
+        logging.info("Upstream %s is DEAD", addr)
 
 def set_upstream(cfg):
     while True:
         ts, addr = UpstreamQueue.get()
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            log.info("Setting upstream to: %s", addr)
+            logging.info("Setting upstream to: %s", addr)
             cfg.last_update = ts
             cfg.upstream_addr = addr
         else:
-            log.info("Upstream %s is not used", addr)
+            logging.info("Upstream %s is not used", addr)
 
 
 # Some versions of windows don't have socket.inet_pton

@@ -3,6 +3,8 @@
 import sys
 import time
 import threading
+import logging
+import logging.handlers
 from os.path import exists
 from socks5 import *
 from config import FurionConfig
@@ -16,6 +18,20 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         FurionConfig.init('furion.cfg')
+
+        # Initialize logger
+        log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
+        logging.basicConfig(format=log_format)
+
+        logger = logging.getLogger()
+
+        if FurionConfig.log_path:
+            formatter = logging.Formatter(log_format)
+            log_handler = logging.handlers.RotatingFileHandler(FurionConfig.log_path)
+            log_handler.setFormatter(formatter)
+            logger.addHandler(log_handler)
+
+        logger.setLevel(FurionConfig.log_level)
 
         # Check available upstream
         if FurionConfig.upstream_servers:

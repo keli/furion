@@ -25,6 +25,8 @@ local_ssl = off
 pem_path = 
 local_auth = off
 allowed_ports = 22,80,443
+log_level = 20
+log_path = 
 
 [upstream]
 upstream_servers = 
@@ -60,6 +62,8 @@ auth_plugin =
             time.sleep(3)
             sys.exit(-1)
         self.allowed_ports = [int(port) for port in self.config.get('main', 'allowed_ports').strip().split(',')]
+        self.log_level = self.config.getint('main', 'log_level')
+        self.log_path = self.config.get('main', 'log_path')
 
 
         self.upstream_servers = self.config.get('upstream', 'upstream_servers')
