@@ -26,9 +26,9 @@ function check_install {
 			die "Not a git or hg repo, cannot upgrade. Please remove $INSTALL_PATH and try again."
 		fi
 
-		DIFF=$(echo `diff examples/furion_client.cfg furion.cfg`)
+		DIFF=$(echo `diff examples/furion_$1.cfg furion.cfg`)
 		if [[ -n $DIFF ]]; then
-			read -r -p "A new furion.cfg for client is found, update and override your local changes? (y/n):"
+			read -r -p "A new furion.cfg for is found, update and override your local changes? (y/n):"
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				cp -f examples/furion_$1.cfg furion.cfg
 			fi
