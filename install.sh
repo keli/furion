@@ -26,26 +26,24 @@ function check_install {
 			die "Not a git or hg repo, cannot upgrade. Please remove $INSTALL_PATH and try again."
 		fi
 
-		if [[ $1 == "client" ]]; then
-			DIFF=$(echo `diff examples/furion_client.cfg furion.cfg`)
-			if [[ -n $DIFF ]]; then
-				read -r -p "A new furion.cfg for client is found, update and override your local changes? (y/n):"
-				if [[ $REPLY =~ ^[Yy]$ ]]; then
-					cp -f examples/furion_client.cfg furion.cfg
-				fi
+		DIFF=$(echo `diff examples/furion_client.cfg furion.cfg`)
+		if [[ -n $DIFF ]]; then
+			read -r -p "A new furion.cfg for client is found, update and override your local changes? (y/n):"
+			if [[ $REPLY =~ ^[Yy]$ ]]; then
+				cp -f examples/furion_$1.cfg furion.cfg
 			fi
+		fi
 
-			if [[ -f upstream.json ]]; then
-				DIFF=$(echo `diff examples/latest_upstream.json upstream.json`)
-				if [[ -n $DIFF ]]; then
-					read -r -p "A new upstream.json is found, update and override your local changes? (y/n):"
-					if [[ $REPLY =~ ^[Yy]$ ]]; then
-						cp -f examples/latest_upstream.json upstream.json
-					fi
+		if [[ -f upstream.json ]]; then
+			DIFF=$(echo `diff examples/latest_upstream.json upstream.json`)
+			if [[ -n $DIFF ]]; then
+				read -r -p "A new upstream.json is found, update and override your local changes? (y/n):"
+				if [[ $REPLY =~ ^[Yy]$ ]]; then
+					cp -f examples/latest_upstream.json upstream.json
 				fi
-			else
-				cp -f examples/latest_upstream.json upstream.json
 			fi
+		else
+			cp -f examples/latest_upstream.json upstream.json
 		fi
 			
 		print_info "Restarting service..."
