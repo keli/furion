@@ -30,7 +30,7 @@ log_path =
 
 [upstream]
 central_url = 
-autoupdate_upstream_list = on
+autoupdate_upstream_list = off
 update_frequency = weekly
 upstream_list_path = upstream.json
 # upstream_ip =

@@ -33,14 +33,15 @@ if __name__ == "__main__":
 
         logger.setLevel(FurionConfig.log_level)
 
-        # Setup threads for upstream checking
-        t1 = threading.Thread(target = run_check, args = (FurionConfig,))
-        t1.setDaemon(1)
-        t1.start()
+        if FurionConfig.upstream_list:
+            # Setup threads for upstream checking
+            t1 = threading.Thread(target = run_check, args = (FurionConfig,))
+            t1.setDaemon(1)
+            t1.start()
 
-        t2 = threading.Thread(target = set_upstream, args = (FurionConfig,))
-        t2.setDaemon(1)
-        t2.start()
+            t2 = threading.Thread(target = set_upstream, args = (FurionConfig,))
+            t2.setDaemon(1)
+            t2.start()
 
         # Trigger an upstream check
         NoticeQueue.put(time.time())
