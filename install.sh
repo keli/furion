@@ -34,16 +34,18 @@ function check_install {
 			fi
 		fi
 
-		if [[ -f upstream.json ]]; then
-			DIFF=$(echo `diff examples/latest_upstream.json upstream.json`)
-			if [[ -n $DIFF ]]; then
-				read -r -p "A new upstream.json is found, update and override your local changes? (y/n):"
-				if [[ $REPLY =~ ^[Yy]$ ]]; then
-					cp -f examples/latest_upstream.json upstream.json
+		if [[ $1 == "client" ]]; then
+			if [[ -f upstream.json ]]; then
+				DIFF=$(echo `diff examples/latest_upstream.json upstream.json`)
+				if [[ -n $DIFF ]]; then
+					read -r -p "A new upstream.json is found, update and override your local changes? (y/n):"
+					if [[ $REPLY =~ ^[Yy]$ ]]; then
+						cp -f examples/latest_upstream.json upstream.json
+					fi
 				fi
+			else
+				cp -f examples/latest_upstream.json upstream.json
 			fi
-		else
-			cp -f examples/latest_upstream.json upstream.json
 		fi
 			
 		print_info "Restarting service..."
