@@ -7,3 +7,4 @@ upstream.json
 build/
 xcuserdata/
 *.pyc
+.DS_Store

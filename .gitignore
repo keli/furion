@@ -3,3 +3,4 @@ furion.log
 upstream.json
 build/*
 *.pyc
+.DS_Store
