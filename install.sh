@@ -27,24 +27,24 @@ function check_install {
 		fi
 
 		if [[ $1 == "client" ]]; then
-			DIFF=$(`diff examples/furion_client.cfg furion.cfg`)
+			DIFF=$(echo `diff examples/furion_client.cfg furion.cfg`)
 			if [[ -n $DIFF ]]; then
-				print_info "A new furion.cfg for client is found, update and override your local changes? (y/n):"
-				read -r
-				if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+				read -r -p "A new furion.cfg for client is found, update and override your local changes? (y/n):"
+				if [[ $REPLY =~ ^[Yy]$ ]]; then
 					cp -f examples/furion_client.cfg furion.cfg
 				fi
 			fi
 
 			if [[ -f upstream.json ]]; then
-				DIFF=$(`diff examples/latest_upstream.json upstream.json`)
+				DIFF=$(echo `diff examples/latest_upstream.json upstream.json`)
 				if [[ -n $DIFF ]]; then
-					print_info "A new upstream.json is found, update and override your local changes? (y/n):"
-					read -r
-					if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+					read -r -p "A new upstream.json is found, update and override your local changes? (y/n):"
+					if [[ $REPLY =~ ^[Yy]$ ]]; then
 						cp -f examples/latest_upstream.json upstream.json
 					fi
 				fi
+			else
+				cp -f examples/latest_upstream.json upstream.json
 			fi
 		fi
 			
@@ -111,11 +111,12 @@ function prepare_server {
 function prepare_client {
 	cd $INSTALL_PATH
 	cp examples/furion_client.cfg furion.cfg
+	cp examples/latest_upstream.json upstream.json
 }
 
 function install {
 	check_sanity
-	check_install
+	check_install $1
 	print_info "Installing Furion as $1..."
 	case $OSTYPE in
 		darwin*)
