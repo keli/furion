@@ -2,9 +2,9 @@ from __future__ import with_statement
 
 import time
 import sys
+import json
 
 from os.path import exists
-
 from StringIO import StringIO
 import ConfigParser
 
@@ -29,13 +29,16 @@ log_level = 20
 log_path = 
 
 [upstream]
-upstream_servers = 
-upstream_ip =
-upstream_port = 443
-upstream_ssl = on
-upstream_auth = on
-upstream_username = 
-upstream_password =
+central_url = 
+autoupdate_upstream_list = on
+update_frequency = weekly
+upstream_list_path = upstream.json
+# upstream_ip =
+# upstream_port = 443
+# upstream_ssl = on
+# upstream_auth = on
+# upstream_username = 
+# upstream_password =
 
 [plugin]
 auth_plugin = 
@@ -66,13 +69,22 @@ auth_plugin =
         self.log_path = self.config.get('main', 'log_path')
 
 
-        self.upstream_servers = self.config.get('upstream', 'upstream_servers')
-        self.upstream_ip = self.config.get('upstream', 'upstream_ip')
-        self.upstream_port = self.config.getint('upstream', 'upstream_port')
-        self.upstream_ssl = self.config.getboolean('upstream', 'upstream_ssl')
-        self.upstream_auth = self.config.getboolean('upstream', 'upstream_auth')
-        self.upstream_username = self.config.get('upstream', 'upstream_username')
-        self.upstream_password = self.config.get('upstream', 'upstream_password')
+        self.central_url = self.config.get('upstream', 'central_url')
+        self.autoupdate_upstream_list = self.config.getboolean('upstream', 'autoupdate_upstream_list')
+        self.update_frequency = self.config.get('upstream', 'update_frequency')
+        self.upstream_list_path = self.config.get('upstream', 'upstream_list_path')
+
+        if exists(self.upstream_list_path):
+            self.upstream_list = json.loads(open(self.upstream_list_path).read())['upstream_list']
+        else:
+            self.upstream_list = None
+        # self.upstream_ip = self.config.get('upstream', 'upstream_ip')
+        # self.upstream_port = self.config.getint('upstream', 'upstream_port')
+        # self.upstream_ssl = self.config.getboolean('upstream', 'upstream_ssl')
+        # self.upstream_auth = self.config.getboolean('upstream', 'upstream_auth')
+        # self.upstream_username = self.config.get('upstream', 'upstream_username')
+        # self.upstream_password = self.config.get('upstream', 'upstream_password')
 
         self.local_addr = (self.local_ip, self.local_port)
-        self.upstream_addr = (self.upstream_ip, self.upstream_port) if self.upstream_ip else None
+        self.upstream_addr = None
+        #self.upstream_addr = (self.upstream_ip, self.upstream_port) if self.upstream_ip else None

@@ -1,7 +1,10 @@
+import os, sys
 import logging
 import socket
 import time
 import threading
+import urllib2
+import json
 from Queue import Queue
 
 MIN_INTERVAL = 10
@@ -41,48 +44,79 @@ def make_connection(addr, bind_to=None, to_upstream=False):
                     pass
     raise e
 
+def get_upstream_from_central(cfg, timing='now'):
+    if timing == 'weekly':
+        st = os.stat(cfg.upstream_list_path)
+        if time.time() - st.st_mtime < 86400 * 7:
+            logging.info("Ignore request to get upstream from central...")
+            return None
+    if cfg.central_url and cfg.autoupdate_upstream_list:
+        try:
+            logging.info("Fetching upstream from central...")
+            jsonstr = urllib2.urlopen(cfg.central_url).read()
+            cfg.upstream_list = json.loads(jsonstr)['upstream_list']
+        except Exception as e:
+            logging.error("Failed to fetch upstream from central:")
+            logging.error(e)
+        else:
+            logging.info("Saving upstream list...")
+            open(cfg.upstream_list_path, 'w').write(jsonstr)   
+            return True
+    else:
+       logging.fatal("No central_url is configured or autoupdate is off.") 
+       return False
+
 def run_check(cfg):
     """ Check alive upstream servers
     """
+    if not cfg.upstream_list:
+        get_upstream_from_central(cfg)
+    else:
+        if cfg.update_frequency == 'start':
+            get_upstream_from_central(cfg)
+        elif cfg.update_frequency == 'weekly':
+            get_upstream_from_central(cfg, 'weekly')
+
     while True:
         ts = NoticeQueue.get()
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            logging.debug("Checking upstream addresses...")
-            addr_list = cfg.upstream_servers.strip().split(',')
-            for addr in addr_list:
-                addr_tmp = addr.strip().split(':')
-                addr_tmp[1] = int(addr_tmp[1])
-                addr_tuple = tuple(addr_tmp)
+            logging.info("Checking for live upstream...")
+            for upstream in cfg.upstream_list:
                 # set a default upstream if none is set already
                 if not cfg.upstream_addr:
-                    cfg.upstream_addr = addr_tuple
-                t = threading.Thread(target = check_alive, args = (addr_tuple,))
+                    cfg.upstream_addr = (upstream['ip'], upstream['port'])
+                t = threading.Thread(target = check_alive, args = (upstream,))
                 t.setDaemon(1)
                 t.start()
 
-def check_alive(addr):
+def check_alive(upstream):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(CONN_TIMEOUT)
     try:
+        addr = (upstream['ip'], upstream['port'])
         sock.connect(addr)
         ts = time.time()
-        UpstreamQueue.put((ts, addr))
-        logging.info("Upstream %s is ALIVE", addr)        
+        UpstreamQueue.put((ts, upstream))
+        logging.debug("Upstream %s is ALIVE", addr)        
     except Exception, e:
         if sock is not None:
             sock.close()
-        logging.info("Upstream %s is DEAD", addr)
+        logging.debug("Upstream %s is DEAD", addr)
 
 def set_upstream(cfg):
     while True:
-        ts, addr = UpstreamQueue.get()
+        ts, upstream = UpstreamQueue.get()
+        addr = (upstream['ip'], upstream['port'])
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
             logging.info("Setting upstream to: %s", addr)
             cfg.last_update = ts
             cfg.upstream_addr = addr
+            cfg.upstream_auth = upstream['auth']
+            cfg.upstream_ssl = upstream['ssl']
+            cfg.upstream_username = upstream['username']
+            cfg.upstream_password = upstream['password']
         else:
-            logging.info("Upstream %s is not used", addr)
-
+            logging.debug("Upstream %s is not used", addr)
 
 # Some versions of windows don't have socket.inet_pton
 if hasattr(socket, 'inet_pton'):

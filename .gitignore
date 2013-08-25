@@ -1,4 +1,5 @@
 furion.cfg
 furion.log
+upstream.json
 build/*
 *.pyc

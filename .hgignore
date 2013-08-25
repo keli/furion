@@ -3,6 +3,7 @@ syntax: glob
 
 furion.cfg
 furion.log
+upstream.json
 build/
 xcuserdata/
 *.pyc

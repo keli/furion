@@ -33,17 +33,17 @@ if __name__ == "__main__":
 
         logger.setLevel(FurionConfig.log_level)
 
-        # Check available upstream
-        if FurionConfig.upstream_servers:
-            t1 = threading.Thread(target = run_check, args = (FurionConfig,))
-            t1.setDaemon(1)
-            t1.start()
+        # Setup threads for upstream checking
+        t1 = threading.Thread(target = run_check, args = (FurionConfig,))
+        t1.setDaemon(1)
+        t1.start()
 
-            t2 = threading.Thread(target = set_upstream, args = (FurionConfig,))
-            t2.setDaemon(1)
-            t2.start()
+        t2 = threading.Thread(target = set_upstream, args = (FurionConfig,))
+        t2.setDaemon(1)
+        t2.start()
 
-            NoticeQueue.put(time.time())
+        # Trigger an upstream check
+        NoticeQueue.put(time.time())
 
         class FurionHandler(Socks5RequestHandler, FurionConfig): pass
         
@@ -52,18 +52,11 @@ if __name__ == "__main__":
         else:
             svr = Socks5Server(FurionConfig.local_addr, FurionHandler)
         
-        print '=' * 78
-        print "Furion server listening on %s, SSL %s, AUTH %s." % \
+        logging.info("Furion server listening on %s, SSL %s, AUTH %s." % \
             (FurionConfig.local_addr, \
             "ON" if FurionConfig.local_ssl else "OFF", \
-            "ON" if FurionConfig.local_auth else "OFF")
+            "ON" if FurionConfig.local_auth else "OFF"))
 
-        print "Default upstream proxy: %s, SSL %s, AUTH %s." % \
-            (FurionConfig.upstream_addr, \
-            "ON" if FurionConfig.upstream_ssl else "OFF", \
-            "ON" if FurionConfig.upstream_auth else "OFF")
-        print '=' * 78
-        
         svr.serve_forever()
         
     except KeyboardInterrupt:

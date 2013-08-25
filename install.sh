@@ -16,17 +16,38 @@ function check_sanity {
 
 function check_install {
 	if [[ -d $INSTALL_PATH ]]; then
+		cd $INSTALL_PATH
 		print_info "Already installed, trying to upgrade..."
-		if [[ -d $INSTALL_PATH/.git ]]; then
-			cd $INSTALL_PATH
+		if [[ -d .git ]]; then
 			git pull
-		elif [[ -d $INSTALL_PATH/.hg ]]; then
-			cd $INSTALL_PATH
+		elif [[ -d .hg ]]; then
 			hg pull && hg up
 		else
 			die "Not a git or hg repo, cannot upgrade. Please remove $INSTALL_PATH and try again."
 		fi
 
+		if [[ $1 == "client" ]]; then
+			DIFF=$(`diff examples/furion_client.cfg furion.cfg`)
+			if [[ -n $DIFF ]]; then
+				print_info "A new furion.cfg for client is found, update and override your local changes? (y/n):"
+				read -r
+				if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+					cp -f examples/furion_client.cfg furion.cfg
+				fi
+			fi
+
+			if [[ -f upstream.json ]]; then
+				DIFF=$(`diff examples/latest_upstream.json upstream.json`)
+				if [[ -n $DIFF ]]; then
+					print_info "A new upstream.json is found, update and override your local changes? (y/n):"
+					read -r
+					if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+						cp -f examples/latest_upstream.json upstream.json
+					fi
+				fi
+			fi
+		fi
+			
 		print_info "Restarting service..."
 		case $OSTYPE in
 			darwin*)
