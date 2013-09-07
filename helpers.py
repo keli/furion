@@ -1,11 +1,13 @@
 import os, sys
 import logging
 import socket
+import SocketServer
 import time
 import threading
 import urllib2
 import json
 from Queue import Queue
+from ping import ping
 
 MIN_INTERVAL = 15
 UPSTREAM_TIMEOUT = 10
@@ -101,13 +103,13 @@ def check_alive(upstream):
     try:
         addr = (upstream['ip'], upstream['port'])
         sock.connect(addr)
-        ts = time.time()
-        UpstreamQueue.put((ts, upstream))
         logging.debug("Upstream %s is ALIVE", addr)        
     except Exception, e:
         if sock is not None:
             sock.close()
         logging.debug("Upstream %s is DEAD", addr)
+    ping((upstream['ip'], upstream['port']))
+    UpstreamQueue.put((time.time(), upstream))
 
 def set_upstream(cfg):
     while True:

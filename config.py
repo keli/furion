@@ -25,6 +25,7 @@ local_ssl = off
 pem_path = 
 local_auth = off
 allowed_ports = 22,80,443
+ping_server = off
 log_level = 20
 log_path = 
 
@@ -65,6 +66,7 @@ auth_plugin =
             time.sleep(3)
             sys.exit(-1)
         self.allowed_ports = [int(port) for port in self.config.get('main', 'allowed_ports').strip().split(',')]
+        self.ping_server = self.config.getboolean('main', 'ping_server')
         self.log_level = self.config.getint('main', 'log_level')
         self.log_path = self.config.get('main', 'log_path')
 
