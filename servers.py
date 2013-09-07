@@ -1,7 +1,10 @@
+import ssl
+import socket
 import SocketServer
 import threading
 from Queue import Queue
 
+TIME_OUT = 30
 POOL_SIZE = 50
 
 class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
