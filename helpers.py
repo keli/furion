@@ -7,8 +7,9 @@ import urllib2
 import json
 from Queue import Queue
 
-MIN_INTERVAL = 10
-CONN_TIMEOUT = 10
+MIN_INTERVAL = 15
+UPSTREAM_TIMEOUT = 10
+CONN_TIMEOUT = 5
 
 # NoticeQueue is used for triggering an upstream check
 NoticeQueue = Queue(1)
@@ -19,29 +20,34 @@ def make_connection(addr, bind_to=None, to_upstream=False):
     """ Make TCP connection and return socket
     """
     domain, port = addr
+    if to_upstream:
+        timeout = UPSTREAM_TIMEOUT
+    else:
+        timeout = CONN_TIMEOUT
     
     for res in socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM):
         af, socktype, proto, canonname, sa = res
         client = None
         try:
             client = socket.socket(af, socktype, proto)
-            client.settimeout(CONN_TIMEOUT)
+            client.settimeout(timeout)
             # Specify outgoing IP on a multihome server
-            if bind_to:
+            if bind_to and bind_to != '127.0.0.1':
                 client.bind((bind_to, 0))
             client.connect(sa)
             return client
         except Exception, e:
             if client is not None:
                 client.close()
-            logging.debug("Error occurred when making connection to dest: %s", e)
+            logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
             # initiate an upstream check
             if to_upstream:
                 logging.debug("Rechecking upstreams...")
                 try:
                     NoticeQueue.put_nowait(time.time())
-                except:
-                    pass
+                except Exception, qe:
+                    logging.debug("Failed writing toNoticeQueue: %s", qe)
+
     raise e
 
 def get_upstream_from_central(cfg, timing='now'):
@@ -91,7 +97,7 @@ def run_check(cfg):
 
 def check_alive(upstream):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(CONN_TIMEOUT)
+    sock.settimeout(UPSTREAM_TIMEOUT)
     try:
         addr = (upstream['ip'], upstream['port'])
         sock.connect(addr)

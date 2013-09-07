@@ -255,21 +255,10 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                         port, = struct.unpack('!H', data[5+length:])
 
                         try:
-                            # Connect to upstream instead of destination
-                            if self.upstream_addr:
-                                sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password, data)
-                                logging.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
-                                dest = sc.connect()
+                            # Connect to destination
+                            dest = self.connect(domain, port, data)
 
-                            # Connect to destination directly
-                            else:
-                                if port not in self.allowed_ports:
-                                    raise Socks5SocketError("Port %d not allowed for %s" % (port, username))
-                                my_ip, my_port = self.request.getsockname()
-                                logging.info("Connecting to %s.", domain)
-                                dest = make_connection((domain, port), my_ip)
-
-                            # Connected to upstream/destination
+                            # If connected to upstream/destination, let client know
                             dsockname = dest.getsockname()
                             client_ip = dsockname[0]
                             client_port = dsockname[1]
@@ -285,7 +274,6 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             self.request.sendall('\x05\x01')
                             raise
 
-                        
             # Starting to forward data
             try:
                 self.forward(self.request, dest)
@@ -311,6 +299,20 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                 self.request.close()
             return
 
+    def connect(self, domain, port, data):
+        # Connect to upstream instead of destination
+        if self.upstream_addr:
+            sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password, data)
+            logging.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
+            return sc.connect()
+        else:
+            # Connect to destination directly
+            if port not in self.allowed_ports:
+                raise Socks5SocketError("Port %d not allowed for %s" % (port, username))
+            my_ip, my_port = self.request.getsockname()
+            logging.info("Connecting to %s.", domain)
+            return make_connection((domain, port), my_ip)
+
     def forward(self, client, server):
         """forward data between sockets"""
         self.client_name = client.getpeername()
@@ -327,7 +329,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
             data = ''
 
             for readable in readables:
-                data = readable.recv(BUF_SIZE)    
+                data = readable.recv(BUF_SIZE)
                 
                 if data:
                     if readable == client:
