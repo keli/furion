@@ -93,6 +93,8 @@ def run_check(cfg):
                 # set a default upstream if none is set already
                 if not cfg.upstream_addr:
                     cfg.upstream_addr = (upstream['ip'], upstream['port'])
+                    cfg.upstream_username = upstream['username']
+                    cfg.upstream_password = upstream['password']
                 t = threading.Thread(target = check_alive, args = (upstream,))
                 t.setDaemon(1)
                 t.start()
@@ -108,8 +110,11 @@ def check_alive(upstream):
         if sock is not None:
             sock.close()
         logging.debug("Upstream %s is DEAD", addr)
-    ping((upstream['ip'], upstream['port']))
-    UpstreamQueue.put((time.time(), upstream))
+    try:
+        ping((upstream['ip'], upstream['port']))
+        UpstreamQueue.put((time.time(), upstream))
+    except Exception, e:
+        logging.debug("Ping to %s failed: %s", addr, e)
 
 def set_upstream(cfg):
     while True:
