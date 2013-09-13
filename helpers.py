@@ -44,9 +44,8 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
             # initiate an upstream check
             if to_upstream:
-                logging.debug("Rechecking upstreams...")
                 try:
-                    NoticeQueue.put_nowait(time.time())
+                    trigger_upstream_check()
                 except Exception, qe:
                     logging.debug("Failed writing toNoticeQueue: %s", qe)
 
@@ -130,6 +129,15 @@ def set_upstream(cfg):
             cfg.upstream_password = upstream['password']
         else:
             logging.debug("Upstream %s is not used", addr)
+
+def trigger_upstream_check():
+    logging.debug("Triggering upstream check...")
+    NoticeQueue.put_nowait(time.time())
+
+def check_upstream_repeatedly(seconds):
+    while True:
+        trigger_upstream_check()
+        time.sleep(seconds)
 
 # Some versions of windows don't have socket.inet_pton
 if hasattr(socket, 'inet_pton'):

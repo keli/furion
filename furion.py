@@ -45,15 +45,17 @@ if __name__ == "__main__":
             t2.setDaemon(1)
             t2.start()
 
-        # Trigger an upstream check
-        NoticeQueue.put(time.time())
-
         # Start UDP ping server
         if cfg.ping_server:
             ping_svr = PingServer(cfg.local_addr, PingHandler)
             t3 = threading.Thread(target = ping_svr.serve_forever, args = (5,))
             t3.setDaemon(1)
             t3.start()
+
+        # Re-check upstream every 30 minutes
+        t4 = threading.Thread(target = check_upstream_repeatedly, args = (1800,))
+        t4.setDaemon(1)
+        t4.start()
 
         class FurionHandler(Socks5RequestHandler, cfg): pass
         
