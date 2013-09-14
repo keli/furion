@@ -88,6 +88,11 @@ function download {
 	GIT=$(echo `which git`)
 	HG=$(echo `which hg`)
 
+	if [[ -f furion.py ]]; then
+		print_info "Copying $PWD to $INSTALL_PATH..."
+		cp -r "$PWD" /usr/local/furion
+		return
+	fi
 	if [[ -n $GIT ]]; then
 		git clone https://github.com/hukeli/furion.git $INSTALL_PATH
 	elif [[ -n $HG ]]; then
