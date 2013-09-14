@@ -3,7 +3,7 @@ Furion
 
 Furion is an encrypted proxy written in Python. In essense, it's just socks5 client/server with chaining and ssl support.
 
-It's often used with a upstream Furion server to avoid censorship. A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. **DISCLAIMER BEGINS** I take absolutely no responsibilities for anything that happened to your data if you choose to use these upstream servers. **DISCLAIMER ENDS** With that being said, these upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE.  
+It's often used with a upstream Furion server to avoid censorship. A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. **DISCLAIMER BEGINS** I take absolutely no responsibilities for anything that happened to your data if you choose to use these upstream servers. If in doubt, get a VPS and setup a furion server of your own. **DISCLAIMER ENDS** With that being said, these upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE.  
 
 Notice
 ------
