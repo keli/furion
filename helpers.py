@@ -47,7 +47,7 @@ def make_connection(addr, bind_to=None, to_upstream=False):
                 try:
                     trigger_upstream_check()
                 except Exception, qe:
-                    logging.debug("Failed writing toNoticeQueue: %s", qe)
+                    logging.debug("Failed writing to NoticeQueue: %s", qe)
 
     raise e
 
@@ -86,8 +86,9 @@ def run_check(cfg):
 
     while True:
         ts = NoticeQueue.get()
-        if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            logging.info("Checking for live upstream...")
+        diff = ts - cfg.last_update
+        if cfg.last_update == 0 or diff > MIN_INTERVAL:
+            logging.info("Last check %d seconds ago, checking for live upstream...", diff)
             for upstream in cfg.upstream_list:
                 # set a default upstream if none is set already
                 if not cfg.upstream_addr:

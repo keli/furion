@@ -1,15 +1,19 @@
 Furion
 ======
 
-Furion is an encrypted proxy written in Python. In essense, it's just socks5 client/server with chaining and ssl support.
+Furion is an encrypted proxy written in Python. In essense, it's just socks5 client/server with chaining and ssl support. 
 
-It's often used with a upstream Furion server to avoid censorship. A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. **DISCLAIMER BEGINS** I take absolutely no responsibilities for anything that happened to your data if you choose to use these upstream servers. If in doubt, get a VPS and setup a furion server of your own. **DISCLAIMER ENDS** With that being said, these upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE.  
+It's often used with a upstream Furion server to avoid censorship. 
+
+A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. These upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE. If in doubt, get a VPS and setup a furion server of your own. 
+
+As a disclaimer, I take absolutely no responsibilities for anything that happened to your data or you for using this software. 
 
 Notice
 ------
 
-Project moved to `GitHub <https://github.com/hukeli/furion>`_. 
-But I'll do my best to maintain a mirror on `BitBucket <https://bitbucket.org/keli/furion>`_.
+Project is hosted at `GitHub <https://github.com/hukeli/furion>`_. 
+But I do my best to maintain a mirror on `BitBucket <https://bitbucket.org/keli/furion>`_.
 The download section on BB seems blocked in China though.
 
 Features
@@ -78,7 +82,7 @@ Read the script and configuration files in `examples <https://github.com/hukeli/
 Use Cases
 ---------
 
-Here are a few use cases that I have found personally:
+Here are a few use cases that I have found useful (all examples are for Mac by default):
 
 SSH Proxy to bitbucket.org
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,18 +105,36 @@ Now I can clone code via ssh from bitbucket without problem::
 
 	hg clone ssh://hg@bitbucket.org/keli/furion
 
+Create A Secure HTTP Proxy with Polipo
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Install polipo::
+
+	brew install polipo
+
+Create a config file at `/etc/polipo/config` with the following content::
+
+	socksParentProxy = "127.0.0.1:11080"
+	socksProxyType = socks5
+
+Reload polipo::
+
+	launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.polipo.plist
+	launchctl load ~/Library/LaunchAgents/homebrew.mxcl.polipo.plist
+
+Then you can use localhost:8123 as http proxy. This is useful when your application
+is only able to use a http proxy, which is the case for many console utilities (wget, pip, etc.). 
+Many times when I cannot pip install something from terminal because of the GFW, 
+I enter the following and voila!::
+
+    export http_proxy=http://127.0.0.1:8123
+    export ALL_PROXY=$http_proxy
+
 Automatically Use Furion to Visit Blocked Sites in Chrome
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Automatically Use Furion to Visit Blocked Sites in Firefox
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Create A Secure HTTP Proxy with Polipo
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Build A Router That Transparently Redirect Selected Traffic via Furion with OpenWRT
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
