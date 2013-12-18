@@ -1,7 +1,7 @@
-Furion
-======
+Furion Socks5 SSL Proxy
+=======================
 
-Furion is an encrypted proxy written in Python. In essense, it's just socks5 client/server with chaining and ssl support. 
+Furion is an encrypted proxy written in Python. In essense, it's just socks5 server with chaining (client) and ssl support. 
 
 It's often used with a upstream Furion server to avoid censorship. 
 
