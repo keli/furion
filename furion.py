@@ -35,6 +35,18 @@ if __name__ == "__main__":
 
         logger.setLevel(cfg.log_level)
 
+        try:
+            import gevent
+            import gevent.monkey
+            gevent.monkey.patch_all()
+        except ImportError:
+            gevent = None
+
+        if gevent:
+            logging.info('Using gevent model...')
+        else:
+            logging.info('Using threading model...')
+
         if cfg.upstream_list:
             # Setup threads for upstream checking
             t1 = threading.Thread(target = run_check, args = (cfg,))
