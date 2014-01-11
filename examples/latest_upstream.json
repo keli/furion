@@ -31,6 +31,14 @@
       "port": 443,
       "ssl": true,
       "username": "furion"
+    },
+    {
+      "auth": true,
+      "ip": "172.245.21.186",
+      "password": "overfirewall",
+      "port": 443,
+      "ssl": true,
+      "username": "furion"
     }
   ]
 }
