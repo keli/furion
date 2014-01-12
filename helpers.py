@@ -9,7 +9,7 @@ import json
 from Queue import Queue
 from ping import ping
 
-MIN_INTERVAL = 15
+MIN_INTERVAL = 30
 UPSTREAM_TIMEOUT = 10
 CONN_TIMEOUT = 5
 
@@ -110,6 +110,7 @@ def check_alive(upstream):
         if sock is not None:
             sock.close()
         logging.debug("Upstream %s is DEAD", addr)
+        return
     try:
         ping((upstream['ip'], upstream['port']))
         UpstreamQueue.put((time.time(), upstream))
