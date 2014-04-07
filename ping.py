@@ -6,14 +6,14 @@ import select
 import SocketServer
 from servers import ThreadPoolMixIn
 
-def ping(addr, count=10, timeout=1):
+def ping(addr, count=20, timeout=1):
     """UDP ping client"""
     # print "--- PING %s:%d ---" % addr
     results = []
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     for i in range(count):
         ts = time.time()
-        data = 'PING %d %f' % (i, ts)
+        data = 'PING %d %f %s' % (i, ts, '#' * 480)
         sock.sendto(data, addr)
         readables, writeables, exceptions = select.select(
             [sock], [], [], timeout)
@@ -22,7 +22,7 @@ def ping(addr, count=10, timeout=1):
             # print "Request timeout for seq %d" % i
             continue
         if readables:
-            ret = readables[0].recv(256)
+            ret = readables[0].recv(512)
             if ret == data:
                 time_spent = (time.time() - ts) * 1000
                 results.append(time_spent)
