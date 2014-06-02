@@ -94,7 +94,7 @@ function download {
 		return
 	fi
 	if [[ -n $GIT ]]; then
-		git clone https://github.com/hukeli/furion.git $INSTALL_PATH
+		git clone https://github.com/keli/furion.git $INSTALL_PATH
 	elif [[ -n $HG ]]; then
 		hg clone https://bitbucket.org/keli/furion $INSTALL_PATH
 	else

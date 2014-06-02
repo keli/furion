@@ -12,7 +12,7 @@ As a disclaimer, I take absolutely no responsibilities for anything that happene
 Notice
 ------
 
-Project is hosted at `GitHub <https://github.com/hukeli/furion>`_. 
+Project is hosted at `GitHub <https://github.com/keli/furion>`_. 
 But I do my best to maintain a mirror on `BitBucket <https://bitbucket.org/keli/furion>`_.
 The download section on BB seems blocked in China though.
 
@@ -37,23 +37,23 @@ Installation
 For Windows 
 ^^^^^^^^^^^^
 
-There is a win32 binary available for download with every `release <https://github.com/hukeli/furion/releases>`_, configured as client for immediate use.
+There is a win32 binary available for download with every `release <https://github.com/keli/furion/releases>`_, configured as client for immediate use.
 
-If you want to build yourself, a python installation must be present, personally I used `ActivePython <http://www.activestate.com/activepython>`_. Then install `pyinstaller <http://www.pyinstaller.org>`_ to `C:\\pyinstaller` and use `pyinstaller.bat <https://github.com/hukeli/furion/blob/master/pyinstaller/pyinstaller.bat>`_ to build.
+If you want to build yourself, a python installation must be present, personally I used `ActivePython <http://www.activestate.com/activepython>`_. Then install `pyinstaller <http://www.pyinstaller.org>`_ to `C:\\pyinstaller` and use `pyinstaller.bat <https://github.com/keli/furion/blob/master/pyinstaller/pyinstaller.bat>`_ to build.
 
 Automated Installation
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-You can use `install.sh <https://github.com/hukeli/furion/blob/master/install.sh>`_ 
+You can use `install.sh <https://github.com/keli/furion/blob/master/install.sh>`_ 
 for quick installation on Mac or Linux (only tested on Debian for now):
 
 - If you have git or hg on your system, you can download just the `install.sh` script::
 
-	curl -O https://raw.github.com/hukeli/furion/master/install.sh
+	curl -O https://raw.github.com/keli/furion/master/install.sh
 
 - ... Or if you don't, download the source zip file instead::
 
-	curl -L -O https://github.com/hukeli/furion/archive/master.zip
+	curl -L -O https://github.com/keli/furion/archive/master.zip
 	unzip master.zip
 	cd furion-master
 
@@ -76,7 +76,7 @@ If you can't use the installation script, manual installation is straight forwar
 
 **TODO**
 
-Read the script and configuration files in `examples <https://github.com/hukeli/furion/blob/master/examples>`_  directory for more information.
+Read the script and configuration files in `examples <https://github.com/keli/furion/blob/master/examples>`_  directory for more information.
 
 
 Use Cases
