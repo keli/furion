@@ -2,23 +2,7 @@
   "upstream_list": [
     {
       "auth": true,
-      "ip": "192.3.21.149",
-      "password": "overfirewall",
-      "port": 443,
-      "ssl": true,
-      "username": "furion"
-    },
-    {
-      "auth": true,
-      "ip": "23.226.225.98",
-      "password": "overfirewall",
-      "port": 443,
-      "ssl": true,
-      "username": "furion"
-    },
-    {
-      "auth": true,
-      "ip": "162.211.225.46",
+      "ip": "155.254.33.79",
       "password": "overfirewall",
       "port": 443,
       "ssl": true,
@@ -34,7 +18,23 @@
     },
     {
       "auth": true,
-      "ip": "155.254.33.79",
+      "ip": "162.211.225.46",
+      "password": "overfirewall",
+      "port": 443,
+      "ssl": true,
+      "username": "furion"
+    },
+    {
+      "auth": true,
+      "ip": "192.3.21.149",
+      "password": "overfirewall",
+      "port": 443,
+      "ssl": true,
+      "username": "furion"
+    },
+    {
+      "auth": true,
+      "ip": "104.206.199.147",
       "password": "overfirewall",
       "port": 443,
       "ssl": true,

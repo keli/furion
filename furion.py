@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
         # Initialize logger
         log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
-        logging.basicConfig(format=log_format)
+        logging.basicConfig(format=log_format, filemode='w')
 
         logger = logging.getLogger()
 

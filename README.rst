@@ -49,7 +49,7 @@ for quick installation on Mac or Linux (only tested on Debian for now):
 
 - If you have git or hg on your system, you can download just the `install.sh` script::
 
-	curl -O https://github.com/keli/furion/raw/master/install.sh
+	curl -L -O https://github.com/keli/furion/raw/master/install.sh
 
 - ... Or if you don't, download the source zip file instead::
 
@@ -135,6 +135,3 @@ Automatically Use Furion to Visit Blocked Sites in Chrome
 
 Automatically Use Furion to Visit Blocked Sites in Firefox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Build A Router That Transparently Redirect Selected Traffic via Furion with OpenWRT
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
