@@ -1,16 +1,9 @@
-import os
-import sys
-import time
-import errno
 import struct
-import traceback
-import threading
 import select
 import socket
 import ssl
 import SocketServer
 import logging
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from types import *
 
@@ -44,11 +37,13 @@ AUTH_ERR_USERNOTFOUND = '\x04'
 class Socks5Exception(Exception):
     """Base socks5 exception class"""
     pass
-    
+
+
 class Socks5NoAuthMethodAccepted(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "No auth method accepted.")
-    
+
+
 class Socks5AuthFailed(Socks5Exception):
     def __init__(self, reason=None):
         if reason:
@@ -56,21 +51,26 @@ class Socks5AuthFailed(Socks5Exception):
         else:
             Exception.__init__(self, "Authentication failed.")
 
+
 class Socks5DnsFailed(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "DNS resolve failed.")
+
 
 class Socks5ConnectionFailed(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "Connection to upstream/destination failed.")
 
+
 class Socks5RemoteConnectionClosed(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "Remote connection closed.")
-        
+
+
 class Socks5SocketError(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "A socket error occurred when forwarding.")
+
 
 class Socks5ConnectionClosed(Socks5Exception):
     def __init__(self):
@@ -236,7 +236,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
         else:
             # Connect to destination directly
             if port not in self.allowed_ports:
-                raise Socks5SocketError("Port %d not allowed for %s" % (port, username))
+                raise Socks5SocketError("Port %d is not allowed" % port)
             my_ip, my_port = self.request.getsockname()
             logging.info("Connecting to %s.", domain)
             return make_connection((domain, port), my_ip)
@@ -308,7 +308,7 @@ class Socks5Client:
                 # Auth failed
                 if ans != '\x01\x00':
                     if not ans or ans[1] == AUTH_ERR_SERVER:
-                        raise Socks5AuthFailed("An error occured on server")
+                        raise Socks5AuthFailed("An error occurred on server")
                     elif ans[1] == AUTH_ERR_BANDWIDTH:
                         raise Socks5AuthFailed("Bandwidth usage exceeded quota")
                     elif ans[1] == AUTH_ERR_NOPLANFOUND:

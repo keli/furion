@@ -4,3 +4,6 @@ upstream.json
 build/*
 *.pyc
 .DS_Store
+.idea/*
+*.bak
+*.orig

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-import time
-import threading
-import logging
 import logging.handlers
 from os.path import exists
 from socks5 import *
@@ -76,10 +72,8 @@ if __name__ == "__main__":
         else:
             svr = Socks5Server(cfg.local_addr, FurionHandler)
         
-        logging.info("Furion server listening on %s, SSL %s, AUTH %s." % \
-            (cfg.local_addr, \
-            "ON" if cfg.local_ssl else "OFF", \
-            "ON" if cfg.local_auth else "OFF"))
+        logging.info("Furion server listening on %s, SSL %s, AUTH %s." %
+                     (cfg.local_addr, "ON" if cfg.local_ssl else "OFF", "ON" if cfg.local_auth else "OFF"))
 
         svr.serve_forever()
         

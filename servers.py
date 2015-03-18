@@ -7,6 +7,7 @@ from Queue import Queue
 TIME_OUT = 30
 POOL_SIZE = 50
 
+
 class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
     """Thread pool mixin"""
 
@@ -35,6 +36,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
         if self.verify_request(request, client_address):
             self.requests.put((request, client_address))
 
+
 class SecureTCPServer(SocketServer.TCPServer):
     """TCP server with SSL"""
     
@@ -59,13 +61,16 @@ class Socks5Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """Threading Socks5 server"""
     allow_reuse_address = True
 
+
 class TPSocks5Server(ThreadPoolMixIn, SocketServer.TCPServer):
     """Thread Pool Socks5 server"""
     pass
-    
+
+
 class SecureSocks5Server(SocketServer.ThreadingMixIn, SecureTCPServer):
     """Secure Socks5 server"""
     pass
+
 
 class TPSecureSocks5Server(ThreadPoolMixIn, SecureTCPServer):
     """Thread Pool Secure Socks5 server"""

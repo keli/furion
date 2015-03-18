@@ -1,7 +1,6 @@
-import os, sys
+import os
 import logging
 import socket
-import SocketServer
 import time
 import threading
 import urllib2
@@ -17,6 +16,7 @@ CONN_TIMEOUT = 5
 NoticeQueue = Queue(1)
 # Alive upstream servers are put into this queue
 UpstreamQueue = Queue(100)
+
 
 def make_connection(addr, bind_to=None, to_upstream=False):
     """ Make TCP connection and return socket
@@ -51,6 +51,7 @@ def make_connection(addr, bind_to=None, to_upstream=False):
 
     raise e
 
+
 def get_upstream_from_central(cfg, timing='now'):
     if timing == 'weekly':
         st = os.stat(cfg.upstream_list_path)
@@ -72,6 +73,7 @@ def get_upstream_from_central(cfg, timing='now'):
     else:
        logging.fatal("No central_url is configured or autoupdate is off.") 
        return False
+
 
 def run_check(cfg):
     """ Check alive upstream servers
@@ -99,6 +101,7 @@ def run_check(cfg):
                 t.setDaemon(1)
                 t.start()
 
+
 def check_alive(upstream):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(UPSTREAM_TIMEOUT)
@@ -117,6 +120,7 @@ def check_alive(upstream):
     except Exception, e:
         logging.debug("Ping to %s failed: %s", addr, e)
 
+
 def set_upstream(cfg):
     while True:
         ts, upstream = UpstreamQueue.get()
@@ -132,9 +136,11 @@ def set_upstream(cfg):
         else:
             logging.debug("Upstream %s is not used", addr)
 
+
 def trigger_upstream_check():
     logging.debug("Triggering upstream check...")
     NoticeQueue.put_nowait(time.time())
+
 
 def check_upstream_repeatedly(seconds):
     while True:
@@ -149,8 +155,10 @@ if hasattr(socket, 'inet_pton'):
 else:
     my_inet_aton = socket.inet_aton
 
+
 def hexstring(s):
     return ' '.join(['%02X' % ord(c) for c in s])
+
 
 # http://stackoverflow.com/a/14620633/1349791
 class AttrDict(dict):
