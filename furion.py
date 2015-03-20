@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import logging.handlers
 from os.path import exists
 from socks5 import *

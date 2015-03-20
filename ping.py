@@ -4,7 +4,7 @@ import logging
 import socket
 import select
 import SocketServer
-from servers import ThreadPoolMixIn
+
 
 def ping(addr, count=20, timeout=1):
     """UDP ping client"""

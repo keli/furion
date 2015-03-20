@@ -76,6 +76,7 @@ class Socks5ConnectionClosed(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "Socks5 connection closed.")
 
+
 class Socks5NotImplemented(Socks5Exception): 
     def __init__(self):
         Exception.__init__(self, "Protocol not implemented yet.")
@@ -164,23 +165,25 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                         
                 # Final stage
                 elif stage == FINAL_STAGE:
-                    if data < 6:
+                    if len(data) < 10:
                         leftover = data
                         continue
 
-                    # Only TCP connections and requests by DNS are allowed
-                    if data[:2] != '\x05\x01' or data[3] != '\x03':
+                    # Only TCP connections and IPV4 are allowed
+                    if data[:2] != '\x05\x01' or data[3] == '\x04':
                         # Protocol error
                         self.request.sendall('\x05\x07')
                         raise Socks5NotImplemented
                     else:
-                        length, = struct.unpack('B', data[4])
-                        if len(data) < 5 + length + 2:
-                            leftover = data
-                            continue
-
-                        domain = data[5:5+length]
-                        port, = struct.unpack('!H', data[5+length:])
+                        # connect by domain name
+                        if data[3] == '\x03':
+                            length, = struct.unpack('B', data[4])
+                            domain = data[5:5+length]
+                            port, = struct.unpack('!H', data[5+length:])
+                        # connect by ip address
+                        elif data[3] == '\x01':
+                            domain = data[4:8]
+                            port, = struct.unpack('!H', data[8:])
 
                         try:
                             # Connect to destination
@@ -248,7 +251,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
         
         while True:
             readables, writeables, exceptions = select.select(
-                [client,server], [], [], TIME_OUT)
+                [client, server], [], [], TIME_OUT)
 
             # exception or timeout
             if exceptions or (readables, writeables, exceptions) == ([], [], []):
@@ -275,9 +278,17 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                     
 class Socks5Client:
     """A socks5 client with optional SSL support"""
+
     def __init__(self, addr, username='', password='', data='', enable_ssl=True, bind_to=None, to_upstream=True):
         """
-        @param data A tuple of remote address you plan to connect to, or packed data of it.
+        :param addr: socket server address tuple
+        :param username: username
+        :param password: password
+        :param data: a tuple of remote address you plan to connect to, or packed data of it.
+        :param enable_ssl: if ssl should be enabled
+        :param bind_to: ip to bind to for the local socket
+        :param to_upstream: if an upstream is used
+        :return: established socket
         """
         self.addr = addr
         self.enable_ssl = enable_ssl

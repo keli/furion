@@ -19,8 +19,15 @@ UpstreamQueue = Queue(100)
 
 
 def make_connection(addr, bind_to=None, to_upstream=False):
-    """ Make TCP connection and return socket
     """
+    Make TCP connection and return socket.
+
+    :param addr: (domain, port) tuple to connect to
+    :param bind_to: ip address to bind to
+    :param to_upstream: if the destination is an upstream server
+    :return: socket
+    """
+
     domain, port = addr
     if to_upstream:
         timeout = UPSTREAM_TIMEOUT
