@@ -182,9 +182,8 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             port, = struct.unpack('!H', data[5+length:])
                         # connect by ip address
                         elif data[3] == '\x01':
-                            domain = data[4:8]
+                            domain = socket.inet_ntoa(data[4:8])
                             port, = struct.unpack('!H', data[8:])
-
                         try:
                             # Connect to destination
                             dest = self.connect(domain, port, data)
