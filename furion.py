@@ -47,38 +47,38 @@ if __name__ == "__main__":
 
         if cfg.upstream_list:
             # Setup threads for upstream checking
-            t1 = threading.Thread(target=run_check, args=(cfg,))
-            t1.setDaemon(1)
-            t1.start()
+            thr = threading.Thread(target=run_check, args=(cfg,))
+            thr.setDaemon(1)
+            thr.start()
 
-            t2 = threading.Thread(target=set_upstream, args=(cfg,))
-            t2.setDaemon(1)
-            t2.start()
+            thr = threading.Thread(target=set_upstream, args=(cfg,))
+            thr.setDaemon(1)
+            thr.start()
 
         # Start UDP ping server
         if cfg.ping_server:
             ping_svr = PingServer(cfg.local_addr, PingHandler)
-            t3 = threading.Thread(target=ping_svr.serve_forever, args=(5,))
-            t3.setDaemon(1)
-            t3.start()
+            thr = threading.Thread(target=ping_svr.serve_forever, args=(5,))
+            thr.setDaemon(1)
+            thr.start()
 
         # Start UDP DNS proxy
         if cfg.dns_proxy:
             class DNSHandler(DNSProxyHandler, cfg):
                 pass
             dns_proxy = DNSServer((cfg.local_ip, cfg.dns_proxy_port), DNSHandler)
-            t4 = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
-            t4.setDaemon(1)
-            t4.start()
+            thr = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
+            thr.setDaemon(1)
+            thr.start()
 
         # Start UDP DNS server
         if cfg.dns_server:
             class DNSHandler(DNSQueryHandler, cfg):
                 pass
             dns_proxy = DNSServer((cfg.local_ip, cfg.dns_server_port), DNSHandler)
-            t5 = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
-            t5.setDaemon(1)
-            t5.start()
+            thr = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
+            thr.setDaemon(1)
+            thr.start()
 
         # Re-check upstream every 30 minutes
         thr = threading.Thread(target=check_upstream_repeatedly, args=(1800,))
