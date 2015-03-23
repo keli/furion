@@ -1,26 +1,24 @@
 Furion Socks5 SSL Proxy
 =======================
 
-Furion is an encrypted proxy written in Python. In essense, it's just socks5 server with chaining (client) and ssl support. 
+Furion is an encrypted proxy written in Python. In essence, it's just socks5 server with chaining and ssl support.
 
 It's often used with upstream Furion servers to avoid censorship. 
 
-A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. These upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE. If in doubt, get a VPS and setup a furion server of your own. 
+A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. These upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE. If in doubt, get a VPS and setup a Furion server of your own.
 
 As a disclaimer, I take absolutely no responsibilities for anything that happened to your data or you for using this software. 
 
-Project is hosted at `GitHub <https://github.com/keli/furion>`_.
-
-Mirrored on `BitBucket <https://bitbucket.org/keli/furion>`_.
+Project is hosted at `GitHub <https://github.com/keli/furion>`_, mirrored on `BitBucket <https://bitbucket.org/keli/furion>`_.
 
 
 Features
 --------
 
-* Automatic upstream failover (when multiple upstream servers are available).
-* Always use the fastest upstream with built-in latency check.
-* Supports periodical upstream updates from a designated central registry.
-* Builtin DNS proxy to avoid poisoning.
+* Automatic upstream fail over (when multiple upstream servers are available).
+* Built-in latency check for choosing the fastest upstream.
+* Periodical upstream updates from a designated central registry.
+* Builtin DNS server/proxy to avoid poisoning.
 * Limit what ports that clients are allowed to connect to.
 * Easy account management on the server side.
 
@@ -31,6 +29,8 @@ Furion has no external dependencies other than a standard Python 2.x (>2.5) inst
 
 Installation
 ------------
+
+By default, when running as a client Furion creates a socks5 proxy on `127.0.0.1:11080`, unless you configure otherwise in `furion.cfg`. There's also a simple DNS server on `127.0.0.1:15353`.
 
 For Windows 
 ^^^^^^^^^^^^
@@ -65,7 +65,6 @@ for quick installation on Mac or Linux (only tested on Debian for now):
 
 The script will clone/copy the code to `/usr/local/furion`, copy appropriate `furion.cfg` from the examples directory, generate a new cert (if you chose to install as server), and try to run it as well as making it start at boot time. The same script can be run again in the future to upgrade to the latest master branch.
 
-By default, when running as client Furion opens a socks5 proxy on `127.0.0.1:11080`, as a server `0.0.0.0:443`, unless you configured otherwise in `furion.cfg`.
 
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^^
@@ -128,8 +127,8 @@ I enter the following and voila!::
     export http_proxy=http://127.0.0.1:8123
     export ALL_PROXY=$http_proxy
 
-Automatically Use Furion to Visit Blocked Sites in Chrome
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Visit Blocked Sites in Chrome with SwitchyOmega
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Automatically Use Furion to Visit Blocked Sites in Firefox
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Visit Blocked Sites in Firefox
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
