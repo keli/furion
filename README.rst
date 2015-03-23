@@ -9,20 +9,18 @@ A few upstream servers are also included (see Installation_ section below), whic
 
 As a disclaimer, I take absolutely no responsibilities for anything that happened to your data or you for using this software. 
 
-Notice
-------
+Project is hosted at `GitHub <https://github.com/keli/furion>`_.
 
-Project is hosted at `GitHub <https://github.com/keli/furion>`_. 
-But I do my best to maintain a mirror on `BitBucket <https://bitbucket.org/keli/furion>`_.
-The download section on BB seems blocked in China though.
+Mirrored on `BitBucket <https://bitbucket.org/keli/furion>`_.
+
 
 Features
 --------
 
 * Automatic upstream failover (when multiple upstream servers are available).
 * Always use the fastest upstream with built-in latency check.
-* Supports periodical upstream updates from a designated central registry. 
-* Prevents DNS leak/poisoning.
+* Supports periodical upstream updates from a designated central registry.
+* Builtin DNS proxy to avoid poisoning.
 * Limit what ports that clients are allowed to connect to.
 * Easy account management on the server side.
 

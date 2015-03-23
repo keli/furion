@@ -7,10 +7,10 @@ import logging
 
 from types import *
 
-from helpers import make_connection, my_inet_aton
+from helpers import make_connection, my_inet_aton, hexstring
 
 ####################################
-## Constants
+# Constants
 ####################################
 
 BUF_SIZE = 1024
@@ -31,7 +31,7 @@ AUTH_ERR_USERNOTFOUND = '\x04'
 
 
 ####################################
-## Exceptions
+# Exceptions
 ####################################
 
 class Socks5Exception(Exception):
@@ -82,8 +82,13 @@ class Socks5NotImplemented(Socks5Exception):
         Exception.__init__(self, "Protocol not implemented yet.")
 
 
+class Socks5PortForbidden(Socks5Exception):
+    def __init__(self, port):
+        Exception.__init__(self, "Port %d is not allowed" % port)
+
+
 ####################################
-## Socks5 handlers
+# Socks5 handlers
 ####################################
 
 class Socks5RequestHandler(SocketServer.StreamRequestHandler):
@@ -105,6 +110,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
 
         stage = INIT_STAGE
         leftover = ''
+        dest = None
 
         try:    
             while stage < CONN_ACCEPTED:
@@ -175,26 +181,35 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                         self.request.sendall('\x05\x07')
                         raise Socks5NotImplemented
                     else:
-                        # connect by domain name
-                        if data[3] == '\x03':
+                        # Connect by domain name
+                        if data[3] == '\x03' or data[3] == '\x02':
                             length, = struct.unpack('B', data[4])
                             domain = data[5:5+length]
                             port, = struct.unpack('!H', data[5+length:])
-                        # connect by ip address
+                        # Connect by ip address
                         elif data[3] == '\x01':
                             domain = socket.inet_ntoa(data[4:8])
                             port, = struct.unpack('!H', data[8:])
                         try:
+                            # Resolve domain to ip
+                            if data[3] == '\x02':
+                                _, _, _, _, sa = socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM)[0]
+                                ip_bytes = my_inet_aton(sa)
+                                port_bytes = struct.pack('!H', port)
+                                self.request.sendall('\x05\x00\x00\x02' + ip_bytes + port_bytes)
+                                # Return without actually connecting to domain
+                                break
                             # Connect to destination
-                            dest = self.connect(domain, port, data)
+                            else:
+                                dest = self.connect(domain, port, data)
 
-                            # If connected to upstream/destination, let client know
-                            dsockname = dest.getsockname()
-                            client_ip = dsockname[0]
-                            client_port = dsockname[1]
-                            ip_bytes = my_inet_aton(client_ip)                            
-                            port_bytes = struct.pack('!H', client_port)
-                            self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
+                                # If connected to upstream/destination, let client know
+                                dsockname = dest.getsockname()
+                                client_ip = dsockname[0]
+                                client_port = dsockname[1]
+                                ip_bytes = my_inet_aton(client_ip)
+                                port_bytes = struct.pack('!H', client_port)
+                                self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
                                 
                             stage = CONN_ACCEPTED
 
@@ -213,7 +228,8 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                 logging.debug('Error when forwarding: %s', e)
                 #traceback.print_exc()
             finally:
-                dest.close()
+                if dest:
+                    dest.close()
                 logging.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out, self.bytes_in, self.client_name, self.server_name)
                 if self.local_auth and (self.bytes_in or self.bytes_out):
                     self.authority.usage(self.member_id, self.bytes_in + self.bytes_out)
@@ -238,7 +254,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
         else:
             # Connect to destination directly
             if port not in self.allowed_ports:
-                raise Socks5SocketError("Port %d is not allowed" % port)
+                raise Socks5PortForbidden(port)
             my_ip, my_port = self.request.getsockname()
             logging.info("Connecting to %s.", domain)
             return make_connection((domain, port), my_ip)
@@ -278,7 +294,8 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
 class Socks5Client:
     """A socks5 client with optional SSL support"""
 
-    def __init__(self, addr, username='', password='', data='', enable_ssl=True, bind_to=None, to_upstream=True):
+    def __init__(self, addr, username='', password='', data='',
+                 enable_ssl=True, bind_to=None, to_upstream=True, dns_only=False):
         """
         :param addr: socket server address tuple
         :param username: username
@@ -287,7 +304,7 @@ class Socks5Client:
         :param enable_ssl: if ssl should be enabled
         :param bind_to: ip to bind to for the local socket
         :param to_upstream: if an upstream is used
-        :return: established socket
+        :return: established socket or resolved address when dns_only is True
         """
         self.addr = addr
         self.enable_ssl = enable_ssl
@@ -338,14 +355,22 @@ class Socks5Client:
 
         if type(self.data) is TupleType:
             domain, port = self.data
-            port_str, = struct.pack('!H', port)
-            len_str, = struct.pack('B', len(domain))
-            data = '\x05\x01\x03' + len_str + domain + port_str
+            port_str = struct.pack('!H', port)
+            len_str = struct.pack('B', len(domain))
+            if dns_only:
+                addr_type = '\x02'
+            else:
+                addr_type = '\x03'
+            data = '\x05\x01\x00' + addr_type + len_str + domain + port_str
         else:
             data = self.data
+
         dest.sendall(data)
         ans = dest.recv(BUF_SIZE)
         if ans.startswith('\x05\x00'):
-            return dest
+            if ans[3] == '\x02':
+                return socket.inet_ntoa(ans[4:8])
+            else:
+                return dest
         else:
             raise Socks5ConnectionFailed

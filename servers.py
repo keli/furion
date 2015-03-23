@@ -81,6 +81,11 @@ class PingServer(ThreadPoolMixIn, SocketServer.UDPServer):
     """UDP Ping server"""
     pass
 
+
+class DNSServer(ThreadPoolMixIn, SocketServer.UDPServer):
+    """UDP DNS Proxy"""
+    pass
+
 # Test server
 # svr = PingServer(('0.0.0.0', 8888), PingHandler)
 # svr.serve_forever(5)

@@ -10,6 +10,7 @@ import ConfigParser
 
 from simpleauth import SimpleAuth
 
+
 class FurionConfig(object):
 
     last_update = 0
@@ -24,8 +25,13 @@ local_port = 11080
 local_ssl = off
 pem_path = 
 local_auth = off
-allowed_ports = 22,80,443
+allowed_ports = 22,53,80,443
 ping_server = off
+dns_server = on
+dns_server_port = 15353
+dns_proxy = off
+dns_proxy_port = 11053
+remote_tcp_dns = 8.8.4.4
 log_level = 20
 log_path = 
 
@@ -67,9 +73,13 @@ auth_plugin =
             sys.exit(-1)
         self.allowed_ports = [int(port) for port in self.config.get('main', 'allowed_ports').strip().split(',')]
         self.ping_server = self.config.getboolean('main', 'ping_server')
+        self.dns_server = self.config.getboolean('main', 'dns_server')
+        self.dns_server_port = self.config.getint('main', 'dns_server_port')
+        self.dns_proxy = self.config.getboolean('main', 'dns_proxy')
+        self.dns_proxy_port = self.config.getint('main', 'dns_proxy_port')
+        self.remote_tcp_dns = self.config.get('main', 'remote_tcp_dns')
         self.log_level = self.config.getint('main', 'log_level')
         self.log_path = self.config.get('main', 'log_path')
-
 
         self.central_url = self.config.get('upstream', 'central_url')
         self.autoupdate_upstream_list = self.config.getboolean('upstream', 'autoupdate_upstream_list')
