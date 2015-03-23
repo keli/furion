@@ -1,9 +1,7 @@
 Furion Socks5 SSL Proxy
 =======================
 
-Furion is an encrypted proxy written in Python. In essence, it's just socks5 server with chaining and ssl support.
-
-It's often used with upstream Furion servers to avoid censorship. 
+Furion is an encrypted proxy written in Python. In essence, it's just socks5 server with chaining and ssl support. It's often used with upstream Furion servers to avoid censorship.
 
 A few upstream servers are also included (see Installation_ section below), which can be used directly for people who just want to get things working ASAP. These upstream servers are assigned solely for this purpose and should be safe in general. So feel free to use them, but DO NOT ABUSE. If in doubt, get a VPS and setup a Furion server of your own.
 
@@ -25,7 +23,7 @@ Features
 Dependencies
 ------------
 
-Furion has no external dependencies other than a standard Python 2.x (>2.5) installation 
+Furion has no external dependencies other than a standard Python 2.x (>2.5) installation. Python 3.x is not yet supported.
 
 Installation
 ------------
@@ -69,11 +67,9 @@ The script will clone/copy the code to `/usr/local/furion`, copy appropriate `fu
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^^
 
-If you can't use the installation script, manual installation is straight forward too. 
+If you can't use the installation script, manual installation is straight forward too. You need a furion.cfg file in the same directory with the binary/script.
 
-**TODO**
-
-Read the script and configuration files in `examples <https://github.com/keli/furion/blob/master/examples>`_  directory for more information.
+Read configuration files in `examples <https://github.com/keli/furion/blob/master/examples>`_  directory for more information.
 
 
 Use Cases
