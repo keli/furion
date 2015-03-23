@@ -51,6 +51,7 @@ class DNSQueryHandler(SocketServer.BaseRequestHandler):
         sock = self.request[1]
 
         query = DNSQuery(data)
-        sc = Socks5Client(self.upstream_addr, data=(query.domain, 0), dns_only=True)
+        sc = Socks5Client(self.upstream_addr, username=self.upstream_username, password=self.upstream_password,
+                          data=(query.domain, 0), dns_only=True)
         ip = sc.connect()
         sock.sendto(query.response(ip), self.client_address)

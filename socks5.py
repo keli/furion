@@ -194,7 +194,8 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                             # Resolve domain to ip
                             if data[3] == '\x02':
                                 _, _, _, _, sa = socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM)[0]
-                                ip_bytes = my_inet_aton(sa)
+                                ip, _ = sa
+                                ip_bytes = my_inet_aton(ip)
                                 port_bytes = struct.pack('!H', port)
                                 self.request.sendall('\x05\x00\x00\x02' + ip_bytes + port_bytes)
                                 # Return without actually connecting to domain
@@ -313,6 +314,7 @@ class Socks5Client:
         self.data = data
         self.bind_to = bind_to
         self.to_upstream = to_upstream
+        self.dns_only = dns_only
         
     def connect(self):
         dest = make_connection(self.addr, self.bind_to, self.to_upstream)
@@ -357,7 +359,7 @@ class Socks5Client:
             domain, port = self.data
             port_str = struct.pack('!H', port)
             len_str = struct.pack('B', len(domain))
-            if dns_only:
+            if self.dns_only:
                 addr_type = '\x02'
             else:
                 addr_type = '\x03'
@@ -369,7 +371,8 @@ class Socks5Client:
         ans = dest.recv(BUF_SIZE)
         if ans.startswith('\x05\x00'):
             if ans[3] == '\x02':
-                return socket.inet_ntoa(ans[4:8])
+                ip, _ = socket.inet_ntoa(ans[4:8])
+                return ip
             else:
                 return dest
         else:

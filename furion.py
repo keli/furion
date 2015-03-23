@@ -72,7 +72,7 @@ if __name__ == "__main__":
             t4.start()
 
         # Start UDP DNS server
-        if cfg.dns_proxy:
+        if cfg.dns_server:
             class DNSHandler(DNSQueryHandler, cfg):
                 pass
             dns_proxy = DNSServer((cfg.local_ip, cfg.dns_server_port), DNSHandler)
