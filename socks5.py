@@ -371,8 +371,7 @@ class Socks5Client:
         ans = dest.recv(BUF_SIZE)
         if ans.startswith('\x05\x00'):
             if ans[3] == '\x02':
-                ip, _ = socket.inet_ntoa(ans[4:8])
-                return ip
+                return socket.inet_ntoa(ans[4:8])
             else:
                 return dest
         else:
