@@ -67,7 +67,7 @@ The script will clone/copy the code to `/usr/local/furion`, copy appropriate `fu
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^^
 
-If you can't use the installation script, manual installation is straight forward too. You need a furion.cfg file in the same directory with the binary/script.
+If you can't use the installation script, manual installation is straight forward too. You need at least a furion.cfg file in the same directory with the executable/script. For client, a `upstream.json` file is also needed for upstream checking to work.
 
 Read configuration files in `examples <https://github.com/keli/furion/blob/master/examples>`_  directory for more information.
 

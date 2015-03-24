@@ -3,7 +3,7 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>hu.keli.furion</string>
+    <string>org.furion</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

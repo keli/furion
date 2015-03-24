@@ -28,7 +28,7 @@ function check_install {
 
 		DIFF=$(echo `diff examples/furion_$1.cfg furion.cfg`)
 		if [[ -n $DIFF ]]; then
-			read -r -p "A new furion.cfg for is found, update and override your local changes? (y/n):"
+			read -r -p "A new furion.cfg is found, update and override your local changes? (y/n):"
 			if [[ $REPLY =~ ^[Yy]$ ]]; then
 				cp -f examples/furion_$1.cfg furion.cfg
 			fi
@@ -51,8 +51,13 @@ function check_install {
 		print_info "Restarting service..."
 		case $OSTYPE in
 			darwin*)
-				launchctl unload /Library/LaunchDaemons/hu.keli.furion.plist
-				launchctl load /Library/LaunchDaemons/hu.keli.furion.plist
+                if [[ -f /Library/LaunchDaemons/hu.keli.furion.plist ]]; then
+                    launchctl unload /Library/LaunchDaemons/org.furion.plist
+                    rm -f /Library/LaunchDaemons/hu.keli.furion.plist
+                    cp -f examples/org.furion.plist /Library/LaunchDaemons/
+                fi
+				launchctl unload /Library/LaunchDaemons/org.furion.plist
+				launchctl load /Library/LaunchDaemons/org.furion.plist
 				;;
 			linux*)
 				service furion restart
@@ -127,8 +132,8 @@ function install {
 		darwin*)
 			download
 			prepare_$1 `date | md5 | head -c 10`
-			cp -f examples/hu.keli.furion.plist /Library/LaunchDaemons/
-			launchctl load /Library/LaunchDaemons/hu.keli.furion.plist
+			cp -f examples/org.furion.plist /Library/LaunchDaemons/
+			launchctl load /Library/LaunchDaemons/org.furion.plist
 			;;	
 		linux*)
 			if [ ! -f /etc/debian_version ]; then
