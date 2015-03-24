@@ -58,7 +58,7 @@ function check_install {
                     launchctl load /Library/LaunchDaemons/org.furion.plist
                 else
                     launchctl unload /Library/LaunchDaemons/org.furion.plist
-                    launchctl load /Library/LaunchDaemons/org.furion.plist                    
+                    launchctl load /Library/LaunchDaemons/org.furion.plist
                 fi
 				;;
 			linux*)

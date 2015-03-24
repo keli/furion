@@ -12,6 +12,13 @@ from servers import *
 
 if __name__ == "__main__":    
     try:
+        # Initialize logger
+        log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
+        logging.basicConfig(format=log_format, filemode='w')
+
+        logger = logging.getLogger()
+
+        # Initialize config
         if not exists('furion.cfg'):
             print "Fatal error: furion.cfg is not found, exiting..."
             time.sleep(3)
@@ -19,11 +26,6 @@ if __name__ == "__main__":
 
         cfg.init('furion.cfg')
 
-        # Initialize logger
-        log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
-        logging.basicConfig(format=log_format, filemode='w')
-
-        logger = logging.getLogger()
 
         if cfg.log_path:
             formatter = logging.Formatter(log_format)

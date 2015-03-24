@@ -8,6 +8,7 @@ from os.path import exists
 from StringIO import StringIO
 import ConfigParser
 
+from helpers import get_upstream_from_central
 from simpleauth import SimpleAuth
 
 
@@ -88,6 +89,8 @@ auth_plugin =
 
         if exists(self.upstream_list_path):
             self.upstream_list = json.loads(open(self.upstream_list_path).read())['upstream_list']
+        elif self.autoupdate_upstream_list:
+            get_upstream_from_central(self)
         else:
             self.upstream_list = None
         # self.upstream_ip = self.config.get('upstream', 'upstream_ip')
