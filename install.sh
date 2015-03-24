@@ -55,9 +55,11 @@ function check_install {
                     launchctl unload /Library/LaunchDaemons/hu.keli.furion.plist
                     rm -f /Library/LaunchDaemons/hu.keli.furion.plist
                     cp -f examples/org.furion.plist /Library/LaunchDaemons/
+                    launchctl load /Library/LaunchDaemons/org.furion.plist
+                else
+                    launchctl unload /Library/LaunchDaemons/org.furion.plist
+                    launchctl load /Library/LaunchDaemons/org.furion.plist                    
                 fi
-				launchctl unload /Library/LaunchDaemons/org.furion.plist
-				launchctl load /Library/LaunchDaemons/org.furion.plist
 				;;
 			linux*)
 				service furion restart
