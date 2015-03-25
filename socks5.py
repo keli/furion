@@ -222,7 +222,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                         try:
                             # Resolve domain to ip
                             if data[3] == '\x02':
-                                _, _, _, _, sa = socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM)[0]
+                                _, _, _, _, sa = filter(lambda x: x[0] == 2, socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM))[0]
                                 ip, _ = sa
                                 ip_bytes = my_inet_aton(ip)
                                 port_bytes = struct.pack('!H', port)
