@@ -36,7 +36,7 @@ class DNSProxyHandler(SocketServer.BaseRequestHandler):
         data = self.request[0].strip()
         sock = self.request[1]
 
-        sc = Socks5Client(self.local_addr, data=(self.dns_server, 53), enable_ssl=False)
+        sc = Socks5Client(self.local_addr, data=(self.remote_tcp_dns, 53), enable_ssl=False)
         server = sc.connect()
         server.sendall(struct.pack('!H', len(data)) + data)
         result = server.recv(65535)
