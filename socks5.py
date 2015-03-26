@@ -251,7 +251,8 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
 
             # Starting to forward data
             try:
-                self.forward(self.request, dest)
+                if dest:
+                    self.forward(self.request, dest)
             except Socks5Exception, e:
                 logging.debug("Forwarding finished: %s", e)
             except Exception, e:
