@@ -17,9 +17,12 @@ def ping(addr, count=20, timeout=1):
         sock.sendto(data, addr)
         readables, writeables, exceptions = select.select(
             [sock], [], [], timeout)
-        # exception or timeout
-        if exceptions or (readables, writeables, exceptions) == ([], [], []):
-            # print "Request timeout for seq %d" % i
+        # exception
+        if exceptions:
+            time.sleep(1)
+            continue
+        # timeout
+        if (readables, writeables, exceptions) == ([], [], []):
             continue
         if readables:
             ret = readables[0].recv(512)
@@ -29,6 +32,7 @@ def ping(addr, count=20, timeout=1):
                 # print '%d bytes from %s:%d, seq=%d time=%.3f ms' % (len(data), addr[0], addr[1], i, time_spent)
                 
     received = len(results)
+    missing = count - received
     loss = count - received
     # print "--- %s:%d ping statistics---" % addr
     # print "%d packets transmitted, %d packets received, %.1f%% packet loss" % (count, received, float(loss)*100/count)
@@ -41,6 +45,9 @@ def ping(addr, count=20, timeout=1):
         stddev = math.sqrt(sum([(x-avg)**2 for x in results])/received)
         # print "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f" % (min_val, avg, max_val, stddev)
         logging.debug("ping %s min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f", addr, min_val, avg, max_val, stddev)
+        return missing * 200 + avg
+    else:
+        return float("inf")
     
 
 class PingHandler(SocketServer.BaseRequestHandler):

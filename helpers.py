@@ -104,8 +104,7 @@ def run_check(cfg):
                     cfg.upstream_addr = (upstream['ip'], upstream['port'])
                     cfg.upstream_username = upstream['username']
                     cfg.upstream_password = upstream['password']
-                t = threading.Thread(target = check_alive, args = (upstream,))
-                t.setDaemon(1)
+                t = threading.Thread(target=check_alive, args=(upstream,))
                 t.start()
 
 
@@ -122,7 +121,8 @@ def check_alive(upstream):
         logging.debug("Upstream %s is DEAD", addr)
         return
     try:
-        ping((upstream['ip'], upstream['port']))
+        score = ping((upstream['ip'], upstream['port']))
+        upstream['ping'] = score
         UpstreamQueue.put((time.time(), upstream))
     except Exception, e:
         logging.debug("Ping to %s failed: %s", addr, e)
@@ -140,6 +140,7 @@ def set_upstream(cfg):
             cfg.upstream_ssl = upstream['ssl']
             cfg.upstream_username = upstream['username']
             cfg.upstream_password = upstream['password']
+            cfg.upstream_ping = upstream['ping']
         else:
             logging.debug("Upstream %s is not used", addr)
 

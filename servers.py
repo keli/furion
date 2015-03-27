@@ -82,10 +82,14 @@ class PingServer(ThreadPoolMixIn, SocketServer.UDPServer):
     pass
 
 
-class DNSServer(ThreadPoolMixIn, SocketServer.UDPServer):
+class DNSServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
     """UDP DNS Proxy"""
     pass
 
+
+class RPCServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
+    """UDP RPC Server"""
+    pass
 # Test server
 # svr = PingServer(('0.0.0.0', 8888), PingHandler)
 # svr.serve_forever(5)

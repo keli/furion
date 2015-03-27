@@ -6,6 +6,7 @@ from os.path import exists
 from socks5 import *
 from ping import PingHandler
 from dns import *
+from rpc import *
 from config import FurionConfig as cfg
 from helpers import *
 from servers import *
@@ -25,7 +26,6 @@ if __name__ == "__main__":
             sys.exit(-1)
 
         cfg.init('furion.cfg')
-
 
         if cfg.log_path:
             formatter = logging.Formatter(log_format)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             class DNSHandler(DNSProxyHandler, cfg):
                 pass
             dns_proxy = DNSServer((cfg.local_ip, cfg.dns_proxy_port), DNSHandler)
-            thr = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
+            thr = threading.Thread(target=dns_proxy.serve_forever, args=())
             thr.setDaemon(1)
             thr.start()
 
@@ -78,9 +78,17 @@ if __name__ == "__main__":
             class DNSHandler(DNSQueryHandler, cfg):
                 pass
             dns_proxy = DNSServer((cfg.local_ip, cfg.dns_server_port), DNSHandler)
-            thr = threading.Thread(target=dns_proxy.serve_forever, args=(5,))
+            thr = threading.Thread(target=dns_proxy.serve_forever, args=())
             thr.setDaemon(1)
             thr.start()
+
+        # Start RPC server
+        class RPCHandler(RPCRequestHandler, cfg):
+            pass
+        rpc_svr = RPCServer((cfg.local_ip, cfg.rpc_port), RPCHandler)
+        thr = threading.Thread(target=rpc_svr.serve_forever, args=())
+        thr.setDaemon(1)
+        thr.start()
 
         # Re-check upstream every 30 minutes
         thr = threading.Thread(target=check_upstream_repeatedly, args=(1800,))

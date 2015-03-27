@@ -17,12 +17,13 @@ class FurionConfig(object):
     last_update = 0
 
     @classmethod
-    def init(self, path):
+    def init(cls, path):
 
         default_cfg = StringIO("""
 [main]
 local_ip = 127.0.0.1
 local_port = 11080
+rpc_port = 11081
 local_ssl = off
 pem_path = 
 local_auth = off
@@ -52,54 +53,56 @@ upstream_list_path = upstream.json
 auth_plugin = 
         """)
         
-        self.config = ConfigParser.ConfigParser()
-        self.config.readfp(default_cfg)
-        self.config.read(path)    
+        cls.config = ConfigParser.ConfigParser()
+        cls.config.readfp(default_cfg)
+        cls.config.read(path)    
 
-        auth_plugin = self.config.get('plugin', 'auth_plugin')
+        auth_plugin = cls.config.get('plugin', 'auth_plugin')
 
-        self.authority = None
+        cls.authority = None
         if auth_plugin == 'simpleauth':
-            self.authority = SimpleAuth()
+            cls.authority = SimpleAuth()
 
-        self.local_ip = self.config.get('main', 'local_ip')
-        self.local_port = self.config.getint('main', 'local_port')
+        cls.local_ip = cls.config.get('main', 'local_ip')
+        cls.local_port = cls.config.getint('main', 'local_port')
+        cls.rpc_port = cls.config.getint('main', 'rpc_port')
 
-        self.local_ssl = self.config.getboolean('main', 'local_ssl')
-        self.local_auth = self.config.getboolean('main', 'local_auth')
-        self.pem_path = self.config.get('main', 'pem_path')
-        if self.pem_path and not exists(self.pem_path):
-            print 'Fatal error: pem "%s" cannot be found.' % self.pem_path
+        cls.local_ssl = cls.config.getboolean('main', 'local_ssl')
+        cls.local_auth = cls.config.getboolean('main', 'local_auth')
+        cls.pem_path = cls.config.get('main', 'pem_path')
+        if cls.pem_path and not exists(cls.pem_path):
+            print 'Fatal error: pem "%s" cannot be found.' % cls.pem_path
             time.sleep(3)
             sys.exit(-1)
-        self.allowed_ports = [int(port) for port in self.config.get('main', 'allowed_ports').strip().split(',')]
-        self.ping_server = self.config.getboolean('main', 'ping_server')
-        self.dns_server = self.config.getboolean('main', 'dns_server')
-        self.dns_server_port = self.config.getint('main', 'dns_server_port')
-        self.dns_proxy = self.config.getboolean('main', 'dns_proxy')
-        self.dns_proxy_port = self.config.getint('main', 'dns_proxy_port')
-        self.remote_tcp_dns = self.config.get('main', 'remote_tcp_dns')
-        self.log_level = self.config.getint('main', 'log_level')
-        self.log_path = self.config.get('main', 'log_path')
+        cls.allowed_ports = [int(port) for port in cls.config.get('main', 'allowed_ports').strip().split(',')]
+        cls.ping_server = cls.config.getboolean('main', 'ping_server')
+        cls.dns_server = cls.config.getboolean('main', 'dns_server')
+        cls.dns_server_port = cls.config.getint('main', 'dns_server_port')
+        cls.dns_proxy = cls.config.getboolean('main', 'dns_proxy')
+        cls.dns_proxy_port = cls.config.getint('main', 'dns_proxy_port')
+        cls.remote_tcp_dns = cls.config.get('main', 'remote_tcp_dns')
+        cls.log_level = cls.config.getint('main', 'log_level')
+        cls.log_path = cls.config.get('main', 'log_path')
 
-        self.central_url = self.config.get('upstream', 'central_url')
-        self.autoupdate_upstream_list = self.config.getboolean('upstream', 'autoupdate_upstream_list')
-        self.update_frequency = self.config.get('upstream', 'update_frequency')
-        self.upstream_list_path = self.config.get('upstream', 'upstream_list_path')
+        cls.central_url = cls.config.get('upstream', 'central_url')
+        cls.autoupdate_upstream_list = cls.config.getboolean('upstream', 'autoupdate_upstream_list')
+        cls.update_frequency = cls.config.get('upstream', 'update_frequency')
+        cls.upstream_list_path = cls.config.get('upstream', 'upstream_list_path')
 
-        if exists(self.upstream_list_path):
-            self.upstream_list = json.loads(open(self.upstream_list_path).read())['upstream_list']
-        elif self.autoupdate_upstream_list:
-            get_upstream_from_central(self)
+        if exists(cls.upstream_list_path):
+            cls.upstream_list = json.loads(open(cls.upstream_list_path).read())['upstream_list']
+        elif cls.autoupdate_upstream_list:
+            get_upstream_from_central(cls)
         else:
-            self.upstream_list = None
-        # self.upstream_ip = self.config.get('upstream', 'upstream_ip')
-        # self.upstream_port = self.config.getint('upstream', 'upstream_port')
-        # self.upstream_ssl = self.config.getboolean('upstream', 'upstream_ssl')
-        # self.upstream_auth = self.config.getboolean('upstream', 'upstream_auth')
-        # self.upstream_username = self.config.get('upstream', 'upstream_username')
-        # self.upstream_password = self.config.get('upstream', 'upstream_password')
+            cls.upstream_list = None
+        # cls.upstream_ip = cls.config.get('upstream', 'upstream_ip')
+        # cls.upstream_port = cls.config.getint('upstream', 'upstream_port')
+        # cls.upstream_ssl = cls.config.getboolean('upstream', 'upstream_ssl')
+        # cls.upstream_auth = cls.config.getboolean('upstream', 'upstream_auth')
+        # cls.upstream_username = cls.config.get('upstream', 'upstream_username')
+        # cls.upstream_password = cls.config.get('upstream', 'upstream_password')
 
-        self.local_addr = (self.local_ip, self.local_port)
-        self.upstream_addr = None
-        #self.upstream_addr = (self.upstream_ip, self.upstream_port) if self.upstream_ip else None
+        cls.local_addr = (cls.local_ip, cls.local_port)
+        cls.upstream_addr = None
+        cls.upstream_ping = None
+        #cls.upstream_addr = (cls.upstream_ip, cls.upstream_port) if cls.upstream_ip else None
