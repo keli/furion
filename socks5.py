@@ -284,7 +284,7 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
             return sc.connect()
         else:
             # Connect to destination directly
-            if port not in self.allowed_ports:
+            if len(self.allowed_ports) > 0 and port not in self.allowed_ports:
                 raise Socks5PortForbidden(port)
             my_ip, my_port = self.request.getsockname()
             logging.info("Connecting to %s.", domain)

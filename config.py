@@ -74,7 +74,11 @@ auth_plugin =
             print 'Fatal error: pem "%s" cannot be found.' % cls.pem_path
             time.sleep(3)
             sys.exit(-1)
-        cls.allowed_ports = [int(port) for port in cls.config.get('main', 'allowed_ports').strip().split(',')]
+        ports = cls.config.get('main', 'allowed_ports').strip()
+        if ports == 'all' or ports == ''
+            cls.allowed_ports = []
+        else:
+            cls.allowed_ports = [int(port) for port in ports.split(',')]
         cls.ping_server = cls.config.getboolean('main', 'ping_server')
         cls.dns_server = cls.config.getboolean('main', 'dns_server')
         cls.dns_server_port = cls.config.getint('main', 'dns_server_port')
