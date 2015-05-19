@@ -75,7 +75,7 @@ auth_plugin =
             time.sleep(3)
             sys.exit(-1)
         ports = cls.config.get('main', 'allowed_ports').strip()
-        if ports == 'all' or ports == ''
+        if ports == 'all' or ports == '':
             cls.allowed_ports = []
         else:
             cls.allowed_ports = [int(port) for port in ports.split(',')]
