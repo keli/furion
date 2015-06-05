@@ -41,8 +41,8 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             client = socket.socket(af, socktype, proto)
             client.settimeout(timeout)
             # Specify outgoing IP on a multihome server
-            if bind_to and bind_to != '127.0.0.1':
-                client.bind((bind_to, 0))
+            # if bind_to and bind_to != '127.0.0.1':
+            #     client.bind((bind_to, 0))
             client.connect(sa)
             return client
         except Exception, e:
