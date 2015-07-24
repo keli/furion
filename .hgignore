@@ -6,6 +6,7 @@ furion.cfg
 furion.log
 upstream.json
 build/
+dist/
 xcuserdata/
 *.pyc
 .DS_Store

@@ -14,9 +14,9 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from relevant files
-with open('README.md', 'r', 'utf-8') as f:
+with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
-with open('HISTORY.md', 'r', 'utf-8') as f:
+with open('HISTORY.rst', 'r', 'utf-8') as f:
     history = f.read()
 
 setup(
@@ -27,7 +27,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='1.4.2',
 
-    description='A socks5 proxy with chaining and ssl support',
+    description='A socks5 proxy with ssl support',
     long_description=readme + '\n\n' + history,
 
     # The project's main homepage.

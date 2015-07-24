@@ -3,6 +3,7 @@ furion.cfg
 furion.log
 upstream.json
 build/*
+dist/*
 *.pyc
 .DS_Store
 .idea/*
