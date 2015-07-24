@@ -1,31 +1,28 @@
-from __future__ import with_statement
+from __future__ import with_statement, print_function
 
 import time
 import sys
 import json
 
-from os.path import exists
-from StringIO import StringIO
-import ConfigParser
+from os.path import exists, dirname, basename, join, abspath
+from io import StringIO
 
-from helpers import get_upstream_from_central
-from simpleauth import SimpleAuth
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+from .helpers import get_upstream_from_central
+from .simpleauth import SimpleAuth
 
 
-class FurionConfig(object):
-
-    last_update = 0
-
-    @classmethod
-    def init(cls, path):
-
-        default_cfg = StringIO("""
+default_config = u"""
 [main]
 local_ip = 127.0.0.1
 local_port = 11080
 rpc_port = 11081
 local_ssl = off
-pem_path = 
+pem_path =
 local_auth = off
 allowed_ports = 22,53,80,443
 ping_server = off
@@ -35,10 +32,10 @@ dns_proxy = off
 dns_proxy_port = 11053
 remote_tcp_dns = 8.8.4.4
 log_level = 20
-log_path = 
+log_path =
 
 [upstream]
-central_url = 
+central_url =
 autoupdate_upstream_list = off
 update_frequency = weekly
 upstream_list_path = upstream.json
@@ -46,22 +43,42 @@ upstream_list_path = upstream.json
 # upstream_port = 443
 # upstream_ssl = on
 # upstream_auth = on
-# upstream_username = 
+# upstream_username =
 # upstream_password =
 
 [plugin]
-auth_plugin = 
-        """)
-        
-        cls.config = ConfigParser.ConfigParser()
+auth_plugin =
+"""
+
+
+class FurionConfig(object):
+    last_update = 0
+
+    @classmethod
+    def get_path(cls, path):
+        if not path:
+            return None
+        if not exists(path) and basename(path) == path:
+            return join(cls.config_dir, path)
+        else:
+            return path
+
+    @classmethod
+    def init(cls, path):
+
+        default_cfg = StringIO(default_config)
+
+        cls.config = ConfigParser()
         cls.config.readfp(default_cfg)
-        cls.config.read(path)    
+        cls.config.read(path)
+        cls.config_dir = dirname(abspath(path))
 
         auth_plugin = cls.config.get('plugin', 'auth_plugin')
 
         cls.authority = None
         if auth_plugin == 'simpleauth':
-            cls.authority = SimpleAuth()
+            cls.password_path = cls.get_path(cls.config.get('simpleauth', 'password_path', 'simpleauth.passwd'))
+            cls.authority = SimpleAuth(cls.password_path)
 
         cls.local_ip = cls.config.get('main', 'local_ip')
         cls.local_port = cls.config.getint('main', 'local_port')
@@ -69,9 +86,9 @@ auth_plugin =
 
         cls.local_ssl = cls.config.getboolean('main', 'local_ssl')
         cls.local_auth = cls.config.getboolean('main', 'local_auth')
-        cls.pem_path = cls.config.get('main', 'pem_path')
+        cls.pem_path = cls.get_path(cls.config.get('main', 'pem_path'))
         if cls.pem_path and not exists(cls.pem_path):
-            print 'Fatal error: pem "%s" cannot be found.' % cls.pem_path
+            print('Fatal error: pem "%s" cannot be found.' % cls.pem_path)
             time.sleep(3)
             sys.exit(-1)
         ports = cls.config.get('main', 'allowed_ports').strip()
@@ -86,12 +103,12 @@ auth_plugin =
         cls.dns_proxy_port = cls.config.getint('main', 'dns_proxy_port')
         cls.remote_tcp_dns = cls.config.get('main', 'remote_tcp_dns')
         cls.log_level = cls.config.getint('main', 'log_level')
-        cls.log_path = cls.config.get('main', 'log_path')
+        cls.log_path = cls.get_path(cls.config.get('main', 'log_path'))
 
         cls.central_url = cls.config.get('upstream', 'central_url')
         cls.autoupdate_upstream_list = cls.config.getboolean('upstream', 'autoupdate_upstream_list')
         cls.update_frequency = cls.config.get('upstream', 'update_frequency')
-        cls.upstream_list_path = cls.config.get('upstream', 'upstream_list_path')
+        cls.upstream_list_path = cls.get_path(cls.config.get('upstream', 'upstream_list_path'))
 
         if exists(cls.upstream_list_path):
             cls.upstream_list = json.loads(open(cls.upstream_list_path).read())['upstream_list']
@@ -109,4 +126,4 @@ auth_plugin =
         cls.local_addr = (cls.local_ip, cls.local_port)
         cls.upstream_addr = None
         cls.upstream_ping = None
-        #cls.upstream_addr = (cls.upstream_ip, cls.upstream_port) if cls.upstream_ip else None
+        # cls.upstream_addr = (cls.upstream_ip, cls.upstream_port) if cls.upstream_ip else None

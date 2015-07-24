@@ -1,9 +1,10 @@
-from socks5 import AUTH_SUCCESSFUL, AUTH_ERR_USERNOTFOUND
+from .socks5 import AUTH_SUCCESSFUL, AUTH_ERR_USERNOTFOUND
+
 
 class SimpleAuth:
-    def __init__(self):
+    def __init__(self, path):
         self.users = {}
-        for line in open('simpleauth.passwd'):
+        for line in open(path):
             line = line.strip()
             if line:
                 user, password = line.split(' ')

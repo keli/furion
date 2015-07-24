@@ -2,16 +2,19 @@ import struct
 import select
 import socket
 import ssl
-import SocketServer
+
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
 import logging
 
-from types import *
-
-from helpers import make_connection, my_inet_aton, hexstring
+from .helpers import make_connection, my_inet_aton, hexstring
 
 # https://github.com/gevent/gevent/issues/477
 # Re-add sslwrap to Python 2.7.9
 import inspect
+
 __ssl__ = __import__('ssl')
 
 try:
@@ -34,11 +37,12 @@ def new_sslwrap(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=
     caller_self = inspect.currentframe().f_back.f_locals['self']
     return context._wrap_socket(sock, server_side=server_side, ssl_sock=caller_self)
 
+
 if not hasattr(_ssl, 'sslwrap'):
     _ssl.sslwrap = new_sslwrap
 
 
-####################################
+# ###################################
 # Constants
 ####################################
 
@@ -49,19 +53,20 @@ TIME_OUT = 30
 INIT_STAGE = 0
 AUTH_STAGE = 1
 FINAL_STAGE = 2
-CONN_ACCEPTED = 3        
+CONN_ACCEPTED = 3
 
 # Socks5 auth codes
-AUTH_SUCCESSFUL = '\x00'
-AUTH_ERR_SERVER = '\x01'
-AUTH_ERR_BANDWIDTH = '\x02'
-AUTH_ERR_NOPLANFOUND = '\x03'
-AUTH_ERR_USERNOTFOUND = '\x04'
+AUTH_SUCCESSFUL = b'\x00'
+AUTH_ERR_SERVER = b'\x01'
+AUTH_ERR_BANDWIDTH = b'\x02'
+AUTH_ERR_NOPLANFOUND = b'\x03'
+AUTH_ERR_USERNOTFOUND = b'\x04'
 
 
 ####################################
 # Exceptions
 ####################################
+
 
 class Socks5Exception(Exception):
     """Base socks5 exception class"""
@@ -106,7 +111,7 @@ class Socks5ConnectionClosed(Socks5Exception):
         Exception.__init__(self, "Socks5 connection closed.")
 
 
-class Socks5NotImplemented(Socks5Exception): 
+class Socks5NotImplemented(Socks5Exception):
     def __init__(self):
         Exception.__init__(self, "Protocol not implemented yet.")
 
@@ -120,35 +125,35 @@ class Socks5PortForbidden(Socks5Exception):
 # Socks5 handlers
 ####################################
 
-class Socks5RequestHandler(SocketServer.StreamRequestHandler):
+class Socks5RequestHandler(socketserver.StreamRequestHandler):
     """Socks5 request handler"""
 
     def setup(self):
-        SocketServer.StreamRequestHandler.setup(self)
-        
+        socketserver.StreamRequestHandler.setup(self)
+
         self.bytes_in = 0
         self.bytes_out = 0
-        
+
         self.member_id = 0
-        
+
         self.client_name = None
         self.server_name = None
-        
+
     def handle(self):
         """Main handler"""
 
         stage = INIT_STAGE
-        leftover = ''
+        leftover = b''
         dest = None
 
-        try:    
+        try:
             while stage < CONN_ACCEPTED:
                 data = self.request.recv(BUF_SIZE)
-                
+
                 # Client closed connection
                 if not data:
                     raise Socks5ConnectionClosed
-                    
+
                 data = leftover + data
 
                 if len(data) < 3:
@@ -158,75 +163,76 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                 # Init stage
                 if stage == INIT_STAGE:
                     # If no auth required                
-                    if not self.local_auth and data == '\x05\x01\x00':
-                        self.request.sendall('\x05\x00')
+                    if not self.local_auth and data == b'\x05\x01\x00':
+                        self.request.sendall(b'\x05\x00')
                         stage = FINAL_STAGE
                         continue
                     # if username/password auth required
-                    elif self.local_auth and data == '\x05\x01\x02':
-                        self.request.sendall('\x05\x02')
+                    elif self.local_auth and data == b'\x05\x01\x02':
+                        self.request.sendall(b'\x05\x02')
                         stage = AUTH_STAGE
                         continue
                     # no auth method accepted
                     else:
-                        self.request.sendall('\x05\xFF')
+                        self.request.sendall(b'\x05\xFF')
                         #print hexstring(data)
                         raise Socks5NoAuthMethodAccepted
-                        
+
                 # Auth stage
                 elif stage == AUTH_STAGE:
                     name_length, = struct.unpack('B', data[1])
                     if len(data[2:]) < name_length + 1:
                         leftover = data
                         continue
-                    pass_length, = struct.unpack('B', data[2+name_length])
-                    if len(data[2+name_length+1:]) < pass_length:
+                    pass_length, = struct.unpack('B', data[2 + name_length])
+                    if len(data[2 + name_length + 1:]) < pass_length:
                         leftover = data
-                        continue                    
+                        continue
 
-                    username = data[2:2+name_length]
-                    password = data[2+name_length+1:]
+                    username = data[2:2 + name_length]
+                    password = data[2 + name_length + 1:]
 
                     self.member_id, error_code = self.authority.auth(username, password)
-                    
+
                     if error_code != AUTH_SUCCESSFUL:
-                        self.request.sendall('\x01' + error_code)
+                        self.request.sendall(b'\x01' + error_code)
                         logging.info('Auth failed for user: %s', username)
                         raise Socks5AuthFailed
                     else:
-                        self.request.sendall('\x01\x00')
+                        self.request.sendall(b'\x01\x00')
                         logging.info('Auth succeeded for user: %s', username)
                         stage = FINAL_STAGE
-                        
+
                 # Final stage
                 elif stage == FINAL_STAGE:
                     if len(data) < 10:
                         leftover = data
                         continue
-
                     # Only TCP connections and IPV4 are allowed
-                    if data[:2] != '\x05\x01' or data[3] == '\x04':
+                    if data[:2] != b'\x05\x01' or data[3:4] == b'\x04':
                         # Protocol error
-                        self.request.sendall('\x05\x07')
+                        self.request.sendall(b'\x05\x07')
                         raise Socks5NotImplemented
                     else:
+                        domain = port = None
                         # Connect by domain name
-                        if data[3] == '\x03' or data[3] == '\x02':
-                            length, = struct.unpack('B', data[4])
-                            domain = data[5:5+length]
-                            port, = struct.unpack('!H', data[5+length:])
+                        if data[3:4] == b'\x03' or data[3:4] == b'\x02':
+                            length, = struct.unpack('B', data[4:5])
+                            domain = data[5:5 + length]
+                            port, = struct.unpack('!H', data[5 + length:])
                         # Connect by ip address
-                        elif data[3] == '\x01':
+                        elif data[3:4] == b'\x01':
                             domain = socket.inet_ntoa(data[4:8])
                             port, = struct.unpack('!H', data[8:])
                         try:
                             # Resolve domain to ip
-                            if data[3] == '\x02':
-                                _, _, _, _, sa = filter(lambda x: x[0] == 2, socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM))[0]
+                            if data[3:4] == b'\x02':
+                                _, _, _, _, sa = \
+                                filter(lambda x: x[0] == 2, socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM))[0]
                                 ip, _ = sa
                                 ip_bytes = my_inet_aton(ip)
                                 port_bytes = struct.pack('!H', port)
-                                self.request.sendall('\x05\x00\x00\x02' + ip_bytes + port_bytes)
+                                self.request.sendall(b'\x05\x00\x00\x02' + ip_bytes + port_bytes)
                                 # Return without actually connecting to domain
                                 break
                             # Connect to destination
@@ -239,35 +245,36 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                                 client_port = dsockname[1]
                                 ip_bytes = my_inet_aton(client_ip)
                                 port_bytes = struct.pack('!H', client_port)
-                                self.request.sendall('\x05\x00\x00\x01' + ip_bytes + port_bytes)
-                                
+                                self.request.sendall(b'\x05\x00\x00\x01' + ip_bytes + port_bytes)
+
                             stage = CONN_ACCEPTED
 
-                        except Exception, e:
-                            logging.debug('Error when trying to resolve/connect to: %s, reason: %s', (domain, port), e)
-                            #traceback.print_exc()
-                            self.request.sendall('\x05\x01')
+                        except Exception as e:
+                            logging.exception('Error when trying to resolve/connect to: %s', (domain, port))
+                            self.request.sendall(b'\x05\x01')
                             raise
 
             # Starting to forward data
             try:
                 if dest:
-                    self.forward(self.request, dest)
-            except Socks5Exception, e:
-                logging.debug("Forwarding finished: %s", e)
-            except Exception, e:
-                logging.debug('Error when forwarding: %s', e)
-                #traceback.print_exc()
+                    result = self.forward(self.request, dest)
+                    if result:
+                        logging.debug("Forwarding finished")
+                    else:
+                        logging.debug('Exception/timeout when forwarding')
+            except Exception as e:
+                logging.exception('Error when forwarding')
             finally:
                 if dest:
                     dest.close()
-                logging.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out, self.bytes_in, self.client_name, self.server_name)
+                logging.info("%d bytes out, %d bytes in. Socks5 session finished %s <-> %s.", self.bytes_out,
+                             self.bytes_in, self.client_name, self.server_name)
                 if self.local_auth and (self.bytes_in or self.bytes_out):
                     self.authority.usage(self.member_id, self.bytes_in + self.bytes_out)
-        except Socks5Exception, e:
-            logging.debug("Connection closed. Reason: %s", e)
-        except Exception, e:
-            logging.debug('Error when proxying: %s', e)
+        except Socks5Exception as e:
+            logging.exception('Connection closed')
+        except Exception as e:
+            logging.exception('Error when proxying')
             #traceback.print_exc()
         finally:
             try:
@@ -294,20 +301,20 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
         """forward data between sockets"""
         self.client_name = client.getpeername()
         self.server_name = server.getpeername()
-        
+
         while True:
             readables, writeables, exceptions = select.select(
                 [client, server], [], [], TIME_OUT)
 
             # exception or timeout
             if exceptions or (readables, writeables, exceptions) == ([], [], []):
-                raise Socks5ConnectionClosed
+                return False
 
             data = ''
 
             for readable in readables:
                 data = readable.recv(BUF_SIZE)
-                
+
                 if data:
                     if readable == client:
                         self.bytes_out += len(data)
@@ -316,12 +323,9 @@ class Socks5RequestHandler(SocketServer.StreamRequestHandler):
                         self.bytes_in += len(data)
                         client.send(data)
                 else:
-                    if readable == client:
-                        raise Socks5ConnectionClosed
-                    else:
-                        raise Socks5RemoteConnectionClosed
+                    return True
 
-                    
+
 class Socks5Client:
     """A socks5 client with optional SSL support"""
 
@@ -339,13 +343,13 @@ class Socks5Client:
         """
         self.addr = addr
         self.enable_ssl = enable_ssl
-        self.username = username
-        self.password = password
+        self.username = username.encode('utf-8')
+        self.password = password.encode('utf-8')
         self.data = data
         self.bind_to = bind_to
         self.to_upstream = to_upstream
         self.dns_only = dns_only
-        
+
     def connect(self):
         dest = make_connection(self.addr, self.bind_to, self.to_upstream)
         # SSL enabled
@@ -355,17 +359,17 @@ class Socks5Client:
         # Server needs authentication
         if self.username and self.password:
             # Send auth method (username/password auth)
-            dest.sendall('\x05\x01\x02')
+            dest.sendall(b'\x05\x01\x02')
             ans = dest.recv(BUF_SIZE)
             # Method accepted
-            if ans == '\x05\x02':                                
+            if ans == b'\x05\x02':
                 name_length = struct.pack('B', len(self.username))
                 pass_length = struct.pack('B', len(self.password))
                 # Start auth
-                dest.sendall('\x01' + name_length + self.username + pass_length + self.password)
+                dest.sendall(b'\x01' + name_length + self.username + pass_length + self.password)
                 ans = dest.recv(BUF_SIZE)
                 # Auth failed
-                if ans != '\x01\x00':
+                if ans != b'\x01\x00':
                     if not ans or ans[1] == AUTH_ERR_SERVER:
                         raise Socks5AuthFailed("An error occurred on server")
                     elif ans[1] == AUTH_ERR_BANDWIDTH:
@@ -380,27 +384,27 @@ class Socks5Client:
                 raise Socks5AuthFailed("No accepted authentication method")
         # No auth needed
         else:
-            dest.sendall('\x05\x01\x00')
+            dest.sendall(b'\x05\x01\x00')
             ans = dest.recv(BUF_SIZE)
-            if ans != '\x05\x00':
+            if ans != b'\x05\x00':
                 raise Socks5AuthFailed
 
-        if type(self.data) is TupleType:
+        if type(self.data) is tuple:
             domain, port = self.data
             port_str = struct.pack('!H', port)
             len_str = struct.pack('B', len(domain))
             if self.dns_only:
-                addr_type = '\x02'
+                addr_type = b'\x02'
             else:
-                addr_type = '\x03'
-            data = '\x05\x01\x00' + addr_type + len_str + domain + port_str
+                addr_type = b'\x03'
+            data = b'\x05\x01\x00' + addr_type + len_str + domain + port_str
         else:
             data = self.data
 
         dest.sendall(data)
         ans = dest.recv(BUF_SIZE)
-        if ans.startswith('\x05\x00'):
-            if ans[3] == '\x02':
+        if ans.startswith(b'\x05\x00'):
+            if ans[3] == b'\x02':
                 return socket.inet_ntoa(ans[4:8])
             else:
                 return dest

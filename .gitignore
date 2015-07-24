@@ -1,3 +1,4 @@
+furion.egg-info/*
 furion.cfg
 furion.log
 upstream.json

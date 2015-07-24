@@ -1,6 +1,7 @@
 # use glob syntax.
 syntax: glob
 
+furion.egg-info/
 furion.cfg
 furion.log
 upstream.json

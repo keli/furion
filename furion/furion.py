@@ -1,17 +1,37 @@
 #!/usr/bin/env python
 
 import sys
+import getopt
 import logging.handlers
 from os.path import exists
-from socks5 import *
-from ping import PingHandler
-from dns import *
-from rpc import *
-from config import FurionConfig as cfg
-from helpers import *
-from servers import *
+from .socks5 import *
+from .ping import PingHandler
+from .dns import *
+from .rpc import *
+from .config import FurionConfig as cfg
+from .helpers import *
+from .servers import *
 
-if __name__ == "__main__":    
+
+def usage():
+    print('Usage: furion -c <furion.cfg>')
+
+
+def main():
+    config_path = 'furion.cfg' if exists('furion.cfg') else '/etc/furion/furion.cfg'
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hc:")
+    except getopt.GetoptError:
+        usage()
+        sys.exit(1)
+    for opt, arg in opts:
+        if opt == "-c":
+            config_path = arg
+        else:
+            usage()
+            sys.exit()
+
     try:
         # Initialize logger
         log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
@@ -20,12 +40,12 @@ if __name__ == "__main__":
         logger = logging.getLogger()
 
         # Initialize config
-        if not exists('furion.cfg'):
-            print "Fatal error: furion.cfg is not found, exiting..."
+        if not exists(config_path):
+            print("Fatal error: %s is not found, exiting..." % config_path)
             time.sleep(3)
             sys.exit(-1)
 
-        cfg.init('furion.cfg')
+        cfg.init(config_path)
 
         if cfg.log_path:
             formatter = logging.Formatter(log_format)
@@ -109,7 +129,10 @@ if __name__ == "__main__":
         svr.serve_forever()
         
     except KeyboardInterrupt:
-        print "Exiting..."
+        print("Exiting...")
         svr.server_close()
         sys.exit()
 
+
+if __name__ == "__main__":    
+    main()

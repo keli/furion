@@ -1,6 +1,9 @@
-from socks5 import Socks5Client
-import SocketServer
+from .socks5 import Socks5Client
 import struct
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
 # from helpers import hexstring
 
 
@@ -30,7 +33,7 @@ class DNSQuery:
         return packet
 
 
-class DNSProxyHandler(SocketServer.BaseRequestHandler):
+class DNSProxyHandler(socketserver.BaseRequestHandler):
     """UDP DNS Proxy handler"""
     def handle(self):
         data = self.request[0].strip()
@@ -44,7 +47,7 @@ class DNSProxyHandler(SocketServer.BaseRequestHandler):
         sock.sendto(result[2:], self.client_address)
 
 
-class DNSQueryHandler(SocketServer.BaseRequestHandler):
+class DNSQueryHandler(socketserver.BaseRequestHandler):
     """UDP DNS Request handler"""
     def handle(self):
         data = self.request[0].strip()

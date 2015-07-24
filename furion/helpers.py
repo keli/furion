@@ -3,10 +3,18 @@ import logging
 import socket
 import time
 import threading
-import urllib2
+
+try:
+    from urllib.request import urlopen, Request
+except ImportError:
+    from urllib2 import urlopen
 import json
-from Queue import Queue
-from ping import ping
+
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
+from .ping import ping
 
 MIN_INTERVAL = 30
 UPSTREAM_TIMEOUT = 10
@@ -33,7 +41,7 @@ def make_connection(addr, bind_to=None, to_upstream=False):
         timeout = UPSTREAM_TIMEOUT
     else:
         timeout = CONN_TIMEOUT
-    
+
     for res in socket.getaddrinfo(domain, port, 0, socket.SOCK_STREAM):
         af, socktype, proto, canonname, sa = res
         client = None
@@ -42,10 +50,10 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             client.settimeout(timeout)
             # Specify outgoing IP on a multihome server
             # if bind_to and bind_to != '127.0.0.1':
-            #     client.bind((bind_to, 0))
+            # client.bind((bind_to, 0))
             client.connect(sa)
             return client
-        except Exception, e:
+        except Exception as e:
             if client is not None:
                 client.close()
             logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
@@ -53,7 +61,7 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             if to_upstream:
                 try:
                     trigger_upstream_check()
-                except Exception, qe:
+                except Exception as qe:
                     logging.debug("Failed writing to NoticeQueue: %s", qe)
 
     raise e
@@ -68,18 +76,18 @@ def get_upstream_from_central(cfg, timing='now'):
     if cfg.central_url and cfg.autoupdate_upstream_list:
         try:
             logging.info("Fetching upstream from central...")
-            jsonstr = urllib2.urlopen(cfg.central_url).read()
+            jsonstr = urlopen(cfg.central_url).read()
             cfg.upstream_list = json.loads(jsonstr)['upstream_list']
         except Exception as e:
             logging.error("Failed to fetch upstream from central:")
             logging.error(e)
         else:
             logging.info("Saving upstream list...")
-            open(cfg.upstream_list_path, 'w').write(jsonstr)   
+            open(cfg.upstream_list_path, 'w').write(jsonstr)
             return True
     else:
-       logging.fatal("No central_url is configured or autoupdate is off.") 
-       return False
+        logging.fatal("No central_url is configured or autoupdate is off.")
+        return False
 
 
 def run_check(cfg):
@@ -114,8 +122,8 @@ def check_alive(upstream):
     try:
         addr = (upstream['ip'], upstream['port'])
         sock.connect(addr)
-        logging.debug("Upstream %s is ALIVE", addr)        
-    except Exception, e:
+        logging.debug("Upstream %s is ALIVE", addr)
+    except Exception as e:
         if sock is not None:
             sock.close()
         logging.debug("Upstream %s is DEAD", addr)
@@ -124,8 +132,11 @@ def check_alive(upstream):
         score = ping((upstream['ip'], upstream['port']))
         upstream['ping'] = score
         UpstreamQueue.put((time.time(), upstream))
-    except Exception, e:
+    except Exception as e:
         logging.debug("Ping to %s failed: %s", addr, e)
+        import traceback
+
+        traceback.print_exc()
 
 
 def set_upstream(cfg):

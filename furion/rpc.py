@@ -1,9 +1,11 @@
-import SocketServer
-import struct
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
 import pickle
 
 
-class RPCRequestHandler(SocketServer.BaseRequestHandler):
+class RPCRequestHandler(socketserver.BaseRequestHandler):
     """UDP RPC server handler"""
     def handle(self):
         data = self.request[0].strip()

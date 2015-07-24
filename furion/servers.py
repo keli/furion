@@ -1,14 +1,20 @@
 import ssl
 import socket
-import SocketServer
 import threading
-from Queue import Queue
+try:
+    import socketserver
+except ImportError:
+    import SocketServer as socketserver
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue
 
 TIME_OUT = 30
 POOL_SIZE = 50
 
 
-class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
+class ThreadPoolMixIn(socketserver.ThreadingMixIn):
     """Thread pool mixin"""
 
     def serve_forever(self, pool_size=POOL_SIZE):
@@ -26,7 +32,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
 
     def process_request_thread(self):
         while True:
-            SocketServer.ThreadingMixIn.process_request_thread(self, *self.requests.get())
+            socketserver.ThreadingMixIn.process_request_thread(self, *self.requests.get())
 
     def handle_request(self):
         try:
@@ -37,13 +43,13 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             self.requests.put((request, client_address))
 
 
-class SecureTCPServer(SocketServer.TCPServer):
+class SecureTCPServer(socketserver.TCPServer):
     """TCP server with SSL"""
     
     allow_reuse_address = True
 
     def __init__(self, pem_path, server_address, handler_class):
-        SocketServer.BaseServer.__init__(self, server_address, handler_class)
+        socketserver.BaseServer.__init__(self, server_address, handler_class)
 
         af, socktype, proto, canonname, sa = socket.getaddrinfo(
             self.server_address[0], self.server_address[1], 0, socket.SOCK_STREAM)[0]
@@ -57,17 +63,17 @@ class SecureTCPServer(SocketServer.TCPServer):
         self.server_activate()
 
 
-class Socks5Server(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class Socks5Server(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """Threading Socks5 server"""
     allow_reuse_address = True
 
 
-class TPSocks5Server(ThreadPoolMixIn, SocketServer.TCPServer):
+class TPSocks5Server(ThreadPoolMixIn, socketserver.TCPServer):
     """Thread Pool Socks5 server"""
     pass
 
 
-class SecureSocks5Server(SocketServer.ThreadingMixIn, SecureTCPServer):
+class SecureSocks5Server(socketserver.ThreadingMixIn, SecureTCPServer):
     """Secure Socks5 server"""
     pass
 
@@ -77,17 +83,17 @@ class TPSecureSocks5Server(ThreadPoolMixIn, SecureTCPServer):
     pass
     
 
-class PingServer(ThreadPoolMixIn, SocketServer.UDPServer):
+class PingServer(ThreadPoolMixIn, socketserver.UDPServer):
     """UDP Ping server"""
     pass
 
 
-class DNSServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
+class DNSServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
     """UDP DNS Proxy"""
     pass
 
 
-class RPCServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
+class RPCServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
     """UDP RPC Server"""
     pass
 # Test server
