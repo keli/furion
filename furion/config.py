@@ -110,12 +110,11 @@ class FurionConfig(object):
         cls.update_frequency = cls.config.get('upstream', 'update_frequency')
         cls.upstream_list_path = cls.get_path(cls.config.get('upstream', 'upstream_list_path'))
 
+        cls.upstream_list = None
         if exists(cls.upstream_list_path):
             cls.upstream_list = json.loads(open(cls.upstream_list_path).read())['upstream_list']
         elif cls.autoupdate_upstream_list:
             get_upstream_from_central(cls)
-        else:
-            cls.upstream_list = None
         # cls.upstream_ip = cls.config.get('upstream', 'upstream_ip')
         # cls.upstream_port = cls.config.getint('upstream', 'upstream_port')
         # cls.upstream_ssl = cls.config.getboolean('upstream', 'upstream_ssl')

@@ -76,7 +76,8 @@ def get_upstream_from_central(cfg, timing='now'):
     if cfg.central_url and cfg.autoupdate_upstream_list:
         try:
             logging.info("Fetching upstream from central...")
-            jsonstr = urlopen(cfg.central_url).read()
+            json = urlopen(cfg.central_url).read()
+            jsonstr = json.decode('utf-8')
             cfg.upstream_list = json.loads(jsonstr)['upstream_list']
         except Exception as e:
             logging.error("Failed to fetch upstream from central:")
