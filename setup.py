@@ -16,8 +16,6 @@ here = path.abspath(path.dirname(__file__))
 # Get the long description from relevant files
 with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
-with open('HISTORY.rst', 'r', 'utf-8') as f:
-    history = f.read()
 
 setup(
     name='furion',
@@ -25,10 +23,10 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.4.2',
+    version='1.4.5',
 
     description='A socks5 proxy with ssl support',
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
 
     # The project's main homepage.
     url='https://github.com/keli/furion',

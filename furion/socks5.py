@@ -175,7 +175,7 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
                     # no auth method accepted
                     else:
                         self.request.sendall(b'\x05\xFF')
-                        #print hexstring(data)
+                        #print(hexstring(data))
                         raise Socks5NoAuthMethodAccepted
 
                 # Auth stage
