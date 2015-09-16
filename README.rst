@@ -45,8 +45,8 @@ or setuptools:
 To start using Furion, you need at least a furion.cfg file. For client,
 a upstream.json file is also needed for upstream checking to work.
 
-By default, Furion will look for furion.cfg and upstream.json in the
-current working directory. You can specify path to the configuration
+By default, Furion will look for furion.cfg and upstream.json in ``/etc/furion``
+or the current working directory. You can specify path to the configuration
 file after a ``-c`` switch.
 
 Read configuration files in
@@ -57,8 +57,7 @@ Client For Windows
 ~~~~~~~~~~~~~~~~~~
 
 There is a win32 binary available for download with every
-`release <https://github.com/keli/furion/releases>`__, configured as
-client for immediate use.
+`release <https://github.com/keli/furion/releases>`__.
 
 If you want to build yourself, a python installation must be present,
 personally I used

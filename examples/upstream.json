@@ -1,0 +1,20 @@
+{
+  "upstream_list": [
+    {
+      "auth": true,
+      "ip": "upstream.ip.1",
+      "password": "password",
+      "port": 443,
+      "ssl": true,
+      "username": "username"
+    },
+    {
+      "auth": true,
+      "ip": "upstream.ip.2",
+      "password": "password",
+      "port": 443,
+      "ssl": true,
+      "username": "username"
+    }
+  ]
+}

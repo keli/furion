@@ -12,11 +12,14 @@
     <string>wheel</string>
     <key>UserName</key>
     <string>root</string>
-    <key>WorkingDirectory</key>
-    <string>/usr/local/furion/</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+	  <key>PATH</key>
+	  <string>/usr/local/bin:/bin:/usr/bin</string>
+	</dict>
     <key>ProgramArguments</key>
     <array>
-      <string>/usr/local/furion/furion.py</string>
+      <string>furion</string>
     </array>
   </dict>
 </plist>

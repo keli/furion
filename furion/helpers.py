@@ -134,9 +134,6 @@ def check_alive(upstream):
         UpstreamQueue.put((time.time(), upstream))
     except Exception as e:
         logging.debug("Ping to %s failed: %s", addr, e)
-        import traceback
-
-        traceback.print_exc()
 
 
 def set_upstream(cfg):
