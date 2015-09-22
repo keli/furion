@@ -286,7 +286,8 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
     def connect(self, domain, port, data):
         # Connect to upstream instead of destination
         if self.upstream_addr:
-            sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password, data)
+            sc = Socks5Client(self.upstream_addr, self.upstream_username, self.upstream_password,
+                              data, enable_ssl=self.upstream_ssl)
             logging.info("Connecting to %s via upstream %s.", domain, self.upstream_addr)
             return sc.connect()
         else:
