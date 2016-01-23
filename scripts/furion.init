@@ -13,8 +13,7 @@
 
 ulimit -s 256
 
-CHDIR=/usr/local/furion
-DAEMON=/usr/local/furion/furion.py
+DAEMON=/usr/local/bin/furion
 PIDFILE=/var/run/furion.pid
 
 case "$1" in
@@ -23,7 +22,6 @@ case "$1" in
     if /sbin/start-stop-daemon --start --pidfile $PIDFILE \
         --user root --group root \
         -b --make-pidfile \
-        --chdir $CHDIR \
         --exec $DAEMON; then
       log_end_msg 0 || true
     else

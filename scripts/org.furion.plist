@@ -12,14 +12,9 @@
     <string>wheel</string>
     <key>UserName</key>
     <string>root</string>
-	<key>EnvironmentVariables</key>
-	<dict>
-	  <key>PATH</key>
-	  <string>/usr/local/bin:/bin:/usr/bin</string>
-	</dict>
     <key>ProgramArguments</key>
     <array>
-      <string>furion</string>
+      <string>/usr/local/bin/furion</string>
     </array>
   </dict>
 </plist>
