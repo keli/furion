@@ -9,7 +9,7 @@ except ImportError:
     import SocketServer as socketserver
 import logging
 
-from .helpers import make_connection, my_inet_aton, hexstring
+from .helpers import make_connection, my_inet_aton, hexstring, trigger_upstream_check
 
 # https://github.com/gevent/gevent/issues/477
 # Re-add sslwrap to Python 2.7.9
@@ -338,8 +338,12 @@ class Socks5Client:
     def connect(self):
         dest = make_connection(self.addr, self.bind_to, self.to_upstream)
         # SSL enabled
-        if self.enable_ssl:
+        if dest and self.enable_ssl:
             dest = ssl.wrap_socket(dest)
+
+        if not dest:
+            trigger_upstream_check()
+            raise Socks5ConnectionFailed()
 
         # Server needs authentication
         if self.username and self.password:

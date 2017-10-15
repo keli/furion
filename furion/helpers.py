@@ -89,13 +89,7 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             if client is not None:
                 client.close()
             logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
-            # # initiate an upstream check
-            # if to_upstream:
-            #     try:
-            #         trigger_upstream_check()
-            #     except Exception as qe:
-            #         logging.debug("Failed writing to NoticeQueue: %s", qe)
-    raise e
+            return None
 
 
 def get_upstream_from_central(cfg, timing='now'):
@@ -153,9 +147,12 @@ def check_alive(upstream):
         addr = (upstream['ip'], upstream['port'])
         dest = make_connection(addr, None, True)
         # SSL enabled
-        if upstream['ssl']:
+        if dest and upstream['ssl']:
             dest = ssl.wrap_socket(dest)
-        logging.debug("Upstream %s is ALIVE", addr)
+            logging.debug("Upstream %s is ALIVE", addr)
+
+        if not dest:
+            logging.debug("Upstream %s is DEAD: Connection failed", addr)
     except Exception as e:
         if dest is not None:
             dest.close()
