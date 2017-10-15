@@ -42,12 +42,28 @@ or setuptools:
 
     easy_install furion
 
-To start using Furion, you need at least a furion.cfg file. For client,
-a upstream.json file is also needed for upstream checking to work.
+To start using Furion, you need at least a furion.cfg file.
 
 By default, Furion will look for furion.cfg and upstream.json in ``/etc/furion``
 or the current working directory. You can specify path to the configuration
 file after a ``-c`` switch.
+
+For client, an upstream.json file is also needed for upstream checking to work.
+Alternatively, you can put the upstream.json file somewhere accessible via http,
+so that you can share that address with your friends. Then configure the ``upstream``
+section of your ``furion.cfg`` file like below, to use that upstream file.
+
+::
+
+    [upstream]
+
+    central_url = http://your.upstream.json
+
+    autoupdate_upstream_list = on
+
+    update_frequency = start
+
+    upstream_list_path = upstream.json
 
 Read configuration files in
 `examples <https://github.com/keli/furion/blob/master/examples>`__

@@ -18,7 +18,7 @@ Features
 Dependencies
 ------------
 
-Furion has no external dependencies other than a standard Python 2.x (\>=2.6) installation. Python 3.x is supported. There is optional support for gevent, which would be used if an existing gevent installation was discovered. 
+Furion has no external dependencies other than a standard Python 2.x (&gt;=2.6) installation. Python 3.x is supported. There is optional support for gevent, which would be used if an existing gevent installation was discovered.
 
 Installation
 ------------
@@ -26,20 +26,31 @@ Installation
 Furion can be installed via pip:
 
     pip install furion
-    
+
 or setuptools:
 
     easy_install furion
-    
-To start using Furion, you need at least a furion.cfg file. For client, a upstream.json file is also needed for upstream checking to work.
-    
-By default, Furion will look for furion.cfg and upstream.json in the current working directory. You can specify path to the configuration file after a `-c` switch.
+
+To start using Furion, you need at least a furion.cfg file.
+
+By default, Furion will look for furion.cfg and upstream.json in `/etc/furion` or the current working directory. You can specify path to the configuration file after a `-c` switch.
+
+For client, an upstream.json file is also needed for upstream checking to work. Alternatively, you can put the upstream.json file somewhere accessible via http, so that you can share that address with your friends. Then configure the `upstream` section of your `furion.cfg` file like below, to use that upstream file.
+
+    [upstream]
+
+    central_url = http://your.upstream.json
+
+    autoupdate_upstream_list = on
+
+    update_frequency = start
+
+    upstream_list_path = upstream.json
 
 Read configuration files in [examples](https://github.com/keli/furion/blob/master/examples) directory for more information.
-    
+
 ### Client For Windows
 
-There is a win32 binary available for download with every [release](https://github.com/keli/furion/releases), configured as client for immediate use.
+There is a win32 binary available for download with every [release](https://github.com/keli/furion/releases).
 
 If you want to build yourself, a python installation must be present, personally I used [ActivePython](http://www.activestate.com/activepython). Then install [pyinstaller](http://www.pyinstaller.org) to C:\\\\pyinstaller and use [pyinstaller.bat](https://github.com/keli/furion/blob/master/scripts/pyinstaller/pyinstaller.bat) to build.
-
