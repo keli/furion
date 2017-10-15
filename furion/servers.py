@@ -10,6 +10,9 @@ try:
 except ImportError:
     from Queue import Queue
 
+
+socketserver.TCPServer.allow_reuse_address = True
+
 TIME_OUT = 30
 POOL_SIZE = 50
 
@@ -46,8 +49,6 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
 class SecureTCPServer(socketserver.TCPServer):
     """TCP server with SSL"""
     
-    allow_reuse_address = True
-
     def __init__(self, pem_path, server_address, handler_class):
         socketserver.BaseServer.__init__(self, server_address, handler_class)
 
@@ -65,7 +66,7 @@ class SecureTCPServer(socketserver.TCPServer):
 
 class Socks5Server(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """Threading Socks5 server"""
-    allow_reuse_address = True
+    pass
 
 
 class TPSocks5Server(ThreadPoolMixIn, socketserver.TCPServer):

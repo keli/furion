@@ -2,6 +2,7 @@ import os
 import logging
 import socket
 import time
+import ssl
 import threading
 
 try:
@@ -15,6 +16,37 @@ try:
 except ImportError:
     from Queue import Queue
 from .ping import ping
+
+# https://github.com/gevent/gevent/issues/477
+# Re-add sslwrap to Python 2.7.9
+import inspect
+
+__ssl__ = __import__('ssl')
+
+try:
+    _ssl = __ssl__._ssl
+except AttributeError:
+    _ssl = __ssl__._ssl2
+
+
+def new_sslwrap(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=__ssl__.CERT_NONE,
+                ssl_version=__ssl__.PROTOCOL_SSLv23, ca_certs=None, ciphers=None):
+    context = __ssl__.SSLContext(ssl_version)
+    context.verify_mode = cert_reqs or __ssl__.CERT_NONE
+    if ca_certs:
+        context.load_verify_locations(ca_certs)
+    if certfile:
+        context.load_cert_chain(certfile, keyfile)
+    if ciphers:
+        context.set_ciphers(ciphers)
+
+    caller_self = inspect.currentframe().f_back.f_locals['self']
+    return context._wrap_socket(sock, server_side=server_side, ssl_sock=caller_self)
+
+
+if not hasattr(_ssl, 'sslwrap'):
+    _ssl.sslwrap = new_sslwrap
+
 
 MIN_INTERVAL = 30
 UPSTREAM_TIMEOUT = 10
@@ -57,13 +89,12 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             if client is not None:
                 client.close()
             logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
-            # initiate an upstream check
-            if to_upstream:
-                try:
-                    trigger_upstream_check()
-                except Exception as qe:
-                    logging.debug("Failed writing to NoticeQueue: %s", qe)
-
+            # # initiate an upstream check
+            # if to_upstream:
+            #     try:
+            #         trigger_upstream_check()
+            #     except Exception as qe:
+            #         logging.debug("Failed writing to NoticeQueue: %s", qe)
     raise e
 
 
@@ -117,16 +148,18 @@ def run_check(cfg):
 
 
 def check_alive(upstream):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(UPSTREAM_TIMEOUT)
+    dest = None
     try:
         addr = (upstream['ip'], upstream['port'])
-        sock.connect(addr)
+        dest = make_connection(addr, None, True)
+        # SSL enabled
+        if upstream['ssl']:
+            dest = ssl.wrap_socket(dest)
         logging.debug("Upstream %s is ALIVE", addr)
     except Exception as e:
-        if sock is not None:
-            sock.close()
-        logging.debug("Upstream %s is DEAD", addr)
+        if dest is not None:
+            dest.close()
+        logging.debug("Upstream %s is DEAD: %s", addr, e)
         return
     try:
         score = ping((upstream['ip'], upstream['port']))
@@ -162,6 +195,7 @@ def check_upstream_repeatedly(seconds):
     while True:
         trigger_upstream_check()
         time.sleep(seconds)
+
 
 # Some versions of windows don't have socket.inet_pton
 if hasattr(socket, 'inet_pton'):
