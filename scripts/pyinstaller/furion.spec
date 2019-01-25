@@ -1,8 +1,9 @@
 # -*- mode: python -*-
-a = Analysis(['..\\furion.py'],
+a = Analysis(['..\\app.py'],
              pathex=['C:\\furion\\pyinstaller'],
              hiddenimports=[],
              hookspath=None)
+a.datas += [('furion.ico', '.\\furion.ico', 'DATA')]
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
@@ -13,4 +14,6 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True , icon='furion.ico')
+          console=False , icon='furion.ico')
+app = BUNDLE(exe,
+             name=os.path.join('dist', 'furion.exe.app'))

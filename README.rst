@@ -5,9 +5,6 @@ Furion is an encrypted proxy written in Python. In essence, it's just
 socks5 server with ssl support. It's often used with upstream Furion
 servers to avoid censorship.
 
-Project is hosted at `GitHub <https://github.com/keli/furion>`__,
-mirrored on `BitBucket <https://bitbucket.org/keli/furion>`__.
-
 Features
 --------
 
@@ -44,14 +41,15 @@ or setuptools:
 
 To start using Furion, you need at least a furion.cfg file.
 
-By default, Furion will look for furion.cfg and upstream.json in ``/etc/furion``
-or the current working directory. You can specify path to the configuration
-file after a ``-c`` switch.
+By default, Furion will look for furion.cfg and upstream.json in
+``/etc/furion`` or the current working directory. You can specify path
+to the configuration file after a ``-c`` switch.
 
-For client, an upstream.json file is also needed for upstream checking to work.
-Alternatively, you can put the upstream.json file somewhere accessible via http,
-so that you can share that address with your friends. Then configure the ``upstream``
-section of your ``furion.cfg`` file like below, to use that upstream file.
+For client, an upstream.json file is also needed for upstream checking
+to work. Alternatively, you can put the upstream.json file somewhere
+accessible via http, so that you can share that address with your
+friends. Then configure the ``upstream`` section of your ``furion.cfg``
+file like below, to use that upstream file.
 
 ::
 
