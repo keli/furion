@@ -73,9 +73,13 @@ Client For Windows
 There is a win32 binary available for download with every
 `release <https://github.com/keli/furion/releases>`__.
 
-If you want to build yourself, a python installation must be present,
-personally I used
-`ActivePython <http://www.activestate.com/activepython>`__. Then install
+Note: You need to put a config file ``furion.cfg`` in the same directory
+of the exe for it to work.
+
+If you want to build the windows client yourself, a python installation
+must be present, personally I used
+`ActivePython <http://www.activestate.com/activepython>`__. You also
+need to install wxPython. Then install
 `pyinstaller <http://www.pyinstaller.org>`__ to C:\\\\pyinstaller and
 use
 `pyinstaller.bat <https://github.com/keli/furion/blob/master/scripts/pyinstaller/pyinstaller.bat>`__
