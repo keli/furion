@@ -77,7 +77,7 @@ class FurionConfig(object):
 
         cls.authority = None
         if auth_plugin == 'simpleauth':
-            cls.password_path = cls.get_path(cls.config.get('simpleauth', 'password_path', 'simpleauth.passwd'))
+            cls.password_path = cls.get_path(cls.config.get('simpleauth', 'password_path'))
             cls.authority = SimpleAuth(cls.password_path)
 
         cls.local_ip = cls.config.get('main', 'local_ip')

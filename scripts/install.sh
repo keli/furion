@@ -115,9 +115,9 @@ function prepare_server {
 	cp examples/simpleauth.passwd .
 
 	openssl req \
-		-x509 -nodes -days 365 \
+		-x509 -nodes -days 3650 \
 		-subj "/C=US/ST=CA/L=LA/CN=$1.com" \
-		-newkey rsa:1024 -keyout furion.pem -out furion.pem
+		-newkey rsa:2048 -keyout furion.pem -out furion.pem
 }
 
 function prepare_client {
