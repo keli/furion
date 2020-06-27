@@ -28,8 +28,6 @@ allowed_ports = 22,53,80,443
 ping_server = off
 dns_server = on
 dns_server_port = 15353
-dns_proxy = off
-dns_proxy_port = 11053
 remote_tcp_dns = 8.8.4.4
 log_level = 20
 log_path =
@@ -99,8 +97,6 @@ class FurionConfig(object):
         cls.ping_server = cls.config.getboolean('main', 'ping_server')
         cls.dns_server = cls.config.getboolean('main', 'dns_server')
         cls.dns_server_port = cls.config.getint('main', 'dns_server_port')
-        cls.dns_proxy = cls.config.getboolean('main', 'dns_proxy')
-        cls.dns_proxy_port = cls.config.getint('main', 'dns_proxy_port')
         cls.remote_tcp_dns = cls.config.get('main', 'remote_tcp_dns')
         cls.log_level = cls.config.getint('main', 'log_level')
         cls.log_path = cls.get_path(cls.config.get('main', 'log_path'))

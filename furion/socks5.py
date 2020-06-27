@@ -380,6 +380,7 @@ class Socks5Client:
 
         if type(self.data) is tuple:
             domain, port = self.data
+            domain = domain.encode('utf-8')
             port_str = struct.pack('!H', port)
             len_str = struct.pack('B', len(domain))
             if self.dns_only:

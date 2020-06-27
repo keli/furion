@@ -83,15 +83,6 @@ def setup_server():
         thr.setDaemon(1)
         thr.start()
 
-    # Start UDP DNS proxy
-    if cfg.dns_proxy:
-        class DNSHandler(DNSProxyHandler, cfg):
-            pass
-        dns_proxy = DNSServer((cfg.local_ip, cfg.dns_proxy_port), DNSHandler)
-        thr = threading.Thread(target=dns_proxy.serve_forever, args=())
-        thr.setDaemon(1)
-        thr.start()
-
     # Start UDP DNS server
     if cfg.dns_server:
         class DNSHandler(DNSQueryHandler, cfg):
