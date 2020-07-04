@@ -20,12 +20,14 @@ default_config = u"""
 [main]
 local_ip = 127.0.0.1
 local_port = 11080
-rpc_port = 11081
+# rpc_port = 11081
+with_systemd = off
 local_ssl = off
 pem_path =
 local_auth = off
 allowed_ports = 22,53,80,443
 ping_server = off
+ping_server_port = 17777
 dns_server = on
 dns_server_port = 15353
 remote_tcp_dns = 8.8.4.4
@@ -80,7 +82,7 @@ class FurionConfig(object):
 
         cls.local_ip = cls.config.get('main', 'local_ip')
         cls.local_port = cls.config.getint('main', 'local_port')
-        cls.rpc_port = cls.config.getint('main', 'rpc_port')
+        cls.with_systemd = cls.config.getboolean('main', 'with_systemd')
 
         cls.local_ssl = cls.config.getboolean('main', 'local_ssl')
         cls.local_auth = cls.config.getboolean('main', 'local_auth')
@@ -94,7 +96,10 @@ class FurionConfig(object):
             cls.allowed_ports = []
         else:
             cls.allowed_ports = [int(port) for port in ports.split(',')]
+
+        # cls.rpc_port = cls.config.getint('main', 'rpc_port')
         cls.ping_server = cls.config.getboolean('main', 'ping_server')
+        cls.ping_server_port = cls.config.getint('main', 'ping_server_port')
         cls.dns_server = cls.config.getboolean('main', 'dns_server')
         cls.dns_server_port = cls.config.getint('main', 'dns_server_port')
         cls.remote_tcp_dns = cls.config.get('main', 'remote_tcp_dns')

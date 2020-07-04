@@ -72,13 +72,13 @@ def setup_server():
         thr.setDaemon(1)
         thr.start()
 
-        thr = threading.Thread(target=set_upstream, args=(cfg,))
+        thr = threading.Thread(target=update_upstream, args=(cfg,))
         thr.setDaemon(1)
         thr.start()
 
     # Start UDP ping server
     if cfg.ping_server:
-        ping_svr = PingServer(cfg.local_addr, PingHandler)
+        ping_svr = PingServer((cfg.local_ip, cfg.ping_server_port), PingHandler)
         thr = threading.Thread(target=ping_svr.serve_forever, args=(5,))
         thr.setDaemon(1)
         thr.start()
@@ -93,12 +93,12 @@ def setup_server():
         thr.start()
 
     # Start RPC server
-    class RPCHandler(RPCRequestHandler, cfg):
-        pass
-    rpc_svr = RPCServer((cfg.local_ip, cfg.rpc_port), RPCHandler)
-    thr = threading.Thread(target=rpc_svr.serve_forever, args=())
-    thr.setDaemon(1)
-    thr.start()
+    # class RPCHandler(RPCRequestHandler, cfg):
+    #     pass
+    # rpc_svr = RPCServer((cfg.local_ip, cfg.rpc_port), RPCHandler)
+    # thr = threading.Thread(target=rpc_svr.serve_forever, args=())
+    # thr.setDaemon(1)
+    # thr.start()
 
     # Re-check upstream every 30 minutes
     thr = threading.Thread(target=check_upstream_repeatedly, args=(1800,))
@@ -109,7 +109,7 @@ def setup_server():
         pass
     
     if cfg.local_ssl:
-        svr = SecureSocks5Server(cfg.pem_path, cfg.local_addr, FurionHandler)
+        svr = SecureSocks5Server(cfg.pem_path, cfg.local_addr, FurionHandler, cfg.with_systemd)
     else:
         svr = Socks5Server(cfg.local_addr, FurionHandler)
     

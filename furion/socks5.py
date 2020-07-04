@@ -164,17 +164,17 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
 
                 # Auth stage
                 elif stage == AUTH_STAGE:
-                    name_length, = struct.unpack('B', data[1])
+                    name_length, = struct.unpack('B', data[1:2])
                     if len(data[2:]) < name_length + 1:
                         leftover = data
                         continue
-                    pass_length, = struct.unpack('B', data[2 + name_length])
+                    pass_length, = struct.unpack('B', data[2 + name_length:2 + name_length + 1])
                     if len(data[2 + name_length + 1:]) < pass_length:
                         leftover = data
                         continue
 
-                    username = data[2:2 + name_length]
-                    password = data[2 + name_length + 1:]
+                    username = data[2:2 + name_length].decode('utf-8')
+                    password = data[2 + name_length + 1:].decode('utf-8')
 
                     self.member_id, error_code = self.authority.auth(username, password)
 
@@ -232,8 +232,7 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
                                 self.request.sendall(b'\x05\x00\x00\x01' + ip_bytes + port_bytes)
 
                             stage = CONN_ACCEPTED
-
-                        except Exception as e:
+                        except:
                             logging.exception('Error when trying to resolve/connect to: %s', (domain, port))
                             self.request.sendall(b'\x05\x01')
                             raise
@@ -246,7 +245,7 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
                         logging.debug("Forwarding finished")
                     else:
                         logging.debug('Exception/timeout when forwarding')
-            except Exception as e:
+            except:
                 logging.exception('Error when forwarding')
             finally:
                 if dest:
@@ -255,9 +254,9 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
                              self.bytes_in, self.client_name, self.server_name)
                 if self.local_auth and (self.bytes_in or self.bytes_out):
                     self.authority.usage(self.member_id, self.bytes_in + self.bytes_out)
-        except Socks5Exception as e:
+        except Socks5Exception:
             logging.exception('Connection closed')
-        except Exception as e:
+        except:
             logging.exception('Error when proxying')
             #traceback.print_exc()
         finally:
@@ -278,7 +277,7 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
             # Connect to destination directly
             if len(self.allowed_ports) > 0 and port not in self.allowed_ports:
                 raise Socks5PortForbidden(port)
-            my_ip, my_port = self.request.getsockname()
+            my_ip, _ = self.request.getsockname()
             logging.info("Connecting to %s.", domain)
             return make_connection((domain, port), my_ip)
 

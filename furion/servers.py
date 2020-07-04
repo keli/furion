@@ -48,20 +48,26 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
 
 class SecureTCPServer(socketserver.TCPServer):
     """TCP server with SSL"""
+    SYSTEMD_FIRST_SOCKET_FD = 3
     
-    def __init__(self, pem_path, server_address, handler_class):
+    def __init__(self, pem_path, server_address, handler_class, with_systemd=False):
         socketserver.BaseServer.__init__(self, server_address, handler_class)
 
         af, socktype, proto, canonname, sa = socket.getaddrinfo(
             self.server_address[0], self.server_address[1], 0, socket.SOCK_STREAM)[0]
-        sock = socket.socket(af, socktype, proto)
+        
+        if not with_systemd:
+            sock = socket.socket(af, socktype, proto)
+        else:
+            sock = socket.fromfd(self.SYSTEMD_FIRST_SOCKET_FD, af, socktype)
         #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(TIME_OUT)
 
         # Don't do handshake on connect for ssl (which will block http://bugs.python.org/issue1251)
         self.socket = ssl.wrap_socket(sock, pem_path, pem_path, server_side=True, do_handshake_on_connect=False)
-        self.server_bind()
-        self.server_activate()
+        if not with_systemd:        
+            self.server_bind()
+            self.server_activate()
 
 
 class Socks5Server(socketserver.ThreadingMixIn, socketserver.TCPServer):

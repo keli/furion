@@ -92,6 +92,14 @@ def make_connection(addr, bind_to=None, to_upstream=False):
             return None
 
 
+def set_upstream(cfg, upstream):
+    cfg.upstream_addr = upstream['ip'], upstream['port']
+    cfg.upstream_auth = upstream['auth']
+    cfg.upstream_ssl = upstream['ssl']
+    cfg.upstream_username = upstream['username']
+    cfg.upstream_password = upstream['password']
+
+
 def get_upstream_from_central(cfg, timing='now'):
     if timing == 'weekly':
         st = os.stat(cfg.upstream_list_path)
@@ -121,6 +129,10 @@ def run_check(cfg):
     if not cfg.upstream_list:
         get_upstream_from_central(cfg)
     else:
+        # set a default upstream if none is set already
+        if not cfg.upstream_addr:
+            set_upstream(cfg, cfg.upstream_list[0])
+
         if cfg.update_frequency == 'start':
             get_upstream_from_central(cfg)
         elif cfg.update_frequency == 'weekly':
@@ -132,11 +144,6 @@ def run_check(cfg):
         if cfg.last_update == 0 or diff > MIN_INTERVAL:
             logging.info("Last check %d seconds ago, checking for live upstream...", diff)
             for upstream in cfg.upstream_list:
-                # set a default upstream if none is set already
-                if not cfg.upstream_addr:
-                    cfg.upstream_addr = (upstream['ip'], upstream['port'])
-                    cfg.upstream_username = upstream['username']
-                    cfg.upstream_password = upstream['password']
                 t = threading.Thread(target=check_alive, args=(upstream,))
                 t.start()
 
@@ -159,28 +166,23 @@ def check_alive(upstream):
         logging.debug("Upstream %s is DEAD: %s", addr, e)
         return
     try:
-        score = ping((upstream['ip'], upstream['port']))
+        ping_port = upstream['ping_port'] if 'ping_port' in upstream else 17777
+        score = ping((upstream['ip'], ping_port))
         upstream['ping'] = score
         UpstreamQueue.put((time.time(), upstream))
     except Exception as e:
-        logging.debug("Ping to %s failed: %s", addr, e)
+        logging.debug("Ping to %s failed: %s", (upstream['ip'], ping_port), e)
 
 
-def set_upstream(cfg):
+def update_upstream(cfg):
     while True:
         ts, upstream = UpstreamQueue.get()
-        addr = (upstream['ip'], upstream['port'])
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            logging.info("Setting upstream to: %s", addr)
+            logging.info("Setting upstream to: %s", (upstream['ip'], upstream['port']))
             cfg.last_update = ts
-            cfg.upstream_addr = addr
-            cfg.upstream_auth = upstream['auth']
-            cfg.upstream_ssl = upstream['ssl']
-            cfg.upstream_username = upstream['username']
-            cfg.upstream_password = upstream['password']
-            cfg.upstream_ping = upstream['ping']
+            set_upstream(cfg, upstream)
         else:
-            logging.debug("Upstream %s is not used", addr)
+            logging.debug("Upstream %s is not used", (upstream['ip'], upstream['port']))
 
 
 def trigger_upstream_check():
