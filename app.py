@@ -1,14 +1,15 @@
 import os, os.path
 import sys
 import wx
+import wx.adv
 import threading
 import subprocess
 
-from .furion import setup_server
+from furion.furion import setup_server
 
-ID_ICON_TIMER = wx.NewId()  
-OPEN_CONFIG=wx.NewId()
-SHOW_LOGS=wx.NewId()  
+ID_ICON_TIMER = wx.NewIdRef()
+OPEN_CONFIG=wx.NewIdRef()
+SHOW_LOGS=wx.NewIdRef()
 
 
 def resource_path(relative_path):
@@ -17,17 +18,17 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-class FurionTaskBarIcon(wx.TaskBarIcon):
+class FurionTaskBarIcon(wx.adv.TaskBarIcon):
 
     def __init__(self, parent):  
-        wx.TaskBarIcon.__init__(self)  
+        wx.adv.TaskBarIcon.__init__(self)  
         self.parentApp = parent  
         self.icon = wx.Icon(resource_path("furion.ico"), wx.BITMAP_TYPE_ICO)  
         self.CreateMenu()  
         self.SetIconImage()
 
     def CreateMenu(self):  
-        self.Bind(wx.EVT_TASKBAR_RIGHT_UP, self.ShowMenu)  
+        self.Bind(wx.adv.EVT_TASKBAR_RIGHT_UP, self.ShowMenu)  
         self.Bind(wx.EVT_MENU, self.parentApp.openConfig, id=OPEN_CONFIG)  
         self.Bind(wx.EVT_MENU, self.parentApp.showLogs, id=SHOW_LOGS)  
         self.menu=wx.Menu()  
@@ -61,17 +62,19 @@ class FurionFrame(wx.Frame):
         self.svr = setup_server()
         self.svr.serve_forever()
 
-    def exitServer(self):
-        self.svr.server_close()
 
-    def exitApp(self, event):  
+    def exitServer(self):
+        self.svr.shutdown()
+        self.Close()
+
+    def exitApp(self, event):
         self.tbicon.RemoveIcon()  
         self.tbicon.Destroy()  
         self.exitServer()
-        sys.exit()
+        
 
     def openConfig(self, event):
-        fpath = 'furion.cfg'  
+        fpath = 'furion.cfg'
         if sys.platform.startswith('darwin'):
             subprocess.call(('open', fpath))
         elif os.name == 'nt': # For Windows
@@ -83,11 +86,11 @@ class FurionFrame(wx.Frame):
         pass
 
 
-def main(argv=None):  
-    app = wx.App(False)  
-    frame = FurionFrame(None, -1, ' ')  
+def main(argv=None):
+    app = wx.App(False)
+    frame = FurionFrame(None, -1, ' ')
     frame.Show(False)  
     app.MainLoop()
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     main()
