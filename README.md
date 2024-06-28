@@ -16,7 +16,7 @@ Features
 Dependencies
 ------------
 
-Furion has no external dependencies other than a standard Python 2.x (&gt;=2.6) installation. Python 3.x is supported. There is optional support for gevent, which would be used if an existing gevent installation was discovered.
+Furion has no external dependencies other than a standard Python 3.x (>=3.7) installation. There is optional support for gevent, which would be used if an existing gevent installation was discovered.
 
 Installation
 ------------
@@ -25,15 +25,17 @@ Furion can be installed via pip:
 
     pip install furion
 
-or setuptools:
+or pipx
 
-    easy_install furion
+    pipx install furion
 
 To start using Furion, you need at least a furion.cfg file.
 
 By default, Furion will look for furion.cfg and upstream.json in `/etc/furion` or the current working directory. You can specify path to the configuration file after a `-c` switch.
 
-For client, an upstream.json file is also needed for upstream checking to work. Alternatively, you can put the upstream.json file somewhere accessible via http, so that you can share that address with your friends. Then configure the `upstream` section of your `furion.cfg` file like below, to use that upstream file.
+For client, an upstream.json file is also needed for upstream checking to work in the same directory your furion.cfg resides in. 
+
+Alternatively, you can put the upstream.json file somewhere accessible via http, so that you can share that address with your friends. Then configure the `upstream` section of your `furion.cfg` file like below, to use that upstream file.
 
     [upstream]
 
