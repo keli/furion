@@ -1,2 +1,3 @@
-:: pyinstaller.exe --onefile --windowed --icon=furion.ico ..\win_app.py
+:: pyinstaller.exe --onefile --noupx --windowed --icon=furion.ico ..\app.py
 pyinstaller.exe furion.spec
+pyinstaller.exe furion-cli.spec

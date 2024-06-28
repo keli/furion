@@ -3,27 +3,10 @@ import select
 import socket
 import ssl
 
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
+import socketserver
 import logging
 
 from .helpers import make_connection, my_inet_aton, hexstring, trigger_upstream_check
-
-# https://github.com/gevent/gevent/issues/477
-# Re-add sslwrap to Python 2.7.9
-
-__ssl__ = __import__('ssl')
-
-try:
-    _ssl = __ssl__._ssl
-except AttributeError:
-    _ssl = __ssl__._ssl2
-
-if not hasattr(_ssl, 'sslwrap'):
-    from .helpers import new_sslwrap
-    _ssl.sslwrap = new_sslwrap
 
 
 # ###################################
@@ -146,7 +129,7 @@ class Socks5RequestHandler(socketserver.StreamRequestHandler):
 
                 # Init stage
                 if stage == INIT_STAGE:
-                    # If no auth required                
+                    # If no auth required
                     if not self.local_auth and data == b'\x05\x01\x00':
                         self.request.sendall(b'\x05\x00')
                         stage = FINAL_STAGE

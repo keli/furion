@@ -9,3 +9,5 @@ dist/*
 .idea/*
 *.bak
 *.orig
+.python-version
+.pdm-python

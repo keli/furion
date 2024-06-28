@@ -8,10 +8,6 @@
     <true/>
     <key>KeepAlive</key>
     <true/>
-    <key>GroupName</key>
-    <string>wheel</string>
-    <key>UserName</key>
-    <string>root</string>
     <key>ProgramArguments</key>
     <array>
       <string>/usr/local/bin/furion</string>

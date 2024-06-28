@@ -1,15 +1,8 @@
 import ssl
 import socket
 import threading
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
-
+import socketserver
+from queue import Queue
 
 socketserver.TCPServer.allow_reuse_address = True
 
@@ -49,13 +42,13 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
 class SecureTCPServer(socketserver.TCPServer):
     """TCP server with SSL"""
     SYSTEMD_FIRST_SOCKET_FD = 3
-    
+
     def __init__(self, pem_path, server_address, handler_class, with_systemd=False):
         socketserver.BaseServer.__init__(self, server_address, handler_class)
 
         af, socktype, proto, canonname, sa = socket.getaddrinfo(
             self.server_address[0], self.server_address[1], 0, socket.SOCK_STREAM)[0]
-        
+
         if not with_systemd:
             sock = socket.socket(af, socktype, proto)
         else:
@@ -65,7 +58,7 @@ class SecureTCPServer(socketserver.TCPServer):
 
         # Don't do handshake on connect for ssl (which will block http://bugs.python.org/issue1251)
         self.socket = ssl.wrap_socket(sock, pem_path, pem_path, server_side=True, do_handshake_on_connect=False)
-        if not with_systemd:        
+        if not with_systemd:
             self.server_bind()
             self.server_activate()
 
@@ -88,7 +81,7 @@ class SecureSocks5Server(socketserver.ThreadingMixIn, SecureTCPServer):
 class TPSecureSocks5Server(ThreadPoolMixIn, SecureTCPServer):
     """Thread Pool Secure Socks5 server"""
     pass
-    
+
 
 class PingServer(ThreadPoolMixIn, socketserver.UDPServer):
     """UDP Ping server"""
@@ -106,4 +99,3 @@ class RPCServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
 # Test server
 # svr = PingServer(('0.0.0.0', 8888), PingHandler)
 # svr.serve_forever(5)
-

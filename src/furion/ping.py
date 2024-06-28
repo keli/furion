@@ -4,10 +4,7 @@ import logging
 import socket
 import select
 
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
+import socketserver
 
 
 def ping(addr, count=20, timeout=1):

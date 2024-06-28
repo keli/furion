@@ -1,9 +1,6 @@
 from .socks5 import Socks5Client
 import struct
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
+import socketserver
 # from helpers import hexstring
 
 
@@ -19,4 +16,3 @@ class DNSQueryHandler(socketserver.BaseRequestHandler):
         result = server.recv(65535)
         server.close()
         sock.sendto(result[2:], self.client_address)
-

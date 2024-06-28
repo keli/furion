@@ -1,0 +1,29 @@
+[project]
+name = "furion"
+version = "1.5.2"
+description = "A socks5 proxy with ssl support"
+authors = [
+    {name = "Keli Hu", email = "dev@keli.hu"},
+]
+dependencies = []
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["socks5 proxy ssl"]
+
+[project.urls]
+Homepage = "https://github.com/keli/furion"
+
+[project.optional-dependencies]
+dev = [
+    "check-manifest",
+]
+test = [
+    "coverage",
+]
+
+[project.scripts]
+furion = "furion.furion:main"
+
+[tool.pdm]
+distribution = true

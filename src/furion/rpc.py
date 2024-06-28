@@ -1,7 +1,4 @@
-try:
-    import socketserver
-except ImportError:
-    import SocketServer as socketserver
+import socketserver
 import pickle
 
 

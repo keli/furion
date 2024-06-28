@@ -5,48 +5,11 @@ import time
 import ssl
 import threading
 
-try:
-    from urllib.request import urlopen, Request
-except ImportError:
-    from urllib2 import urlopen
+from urllib.request import urlopen, Request
 import json
 
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue
+from queue import Queue
 from .ping import ping
-
-# https://github.com/gevent/gevent/issues/477
-# Re-add sslwrap to Python 2.7.9
-import inspect
-
-__ssl__ = __import__('ssl')
-
-try:
-    _ssl = __ssl__._ssl
-except AttributeError:
-    _ssl = __ssl__._ssl2
-
-
-def new_sslwrap(sock, server_side=False, keyfile=None, certfile=None, cert_reqs=__ssl__.CERT_NONE,
-                ssl_version=__ssl__.PROTOCOL_SSLv23, ca_certs=None, ciphers=None):
-    context = __ssl__.SSLContext(ssl_version)
-    context.verify_mode = cert_reqs or __ssl__.CERT_NONE
-    if ca_certs:
-        context.load_verify_locations(ca_certs)
-    if certfile:
-        context.load_cert_chain(certfile, keyfile)
-    if ciphers:
-        context.set_ciphers(ciphers)
-
-    caller_self = inspect.currentframe().f_back.f_locals['self']
-    return context._wrap_socket(sock, server_side=server_side, ssl_sock=caller_self)
-
-
-if not hasattr(_ssl, 'sslwrap'):
-    _ssl.sslwrap = new_sslwrap
-
 
 MIN_INTERVAL = 30
 UPSTREAM_TIMEOUT = 10
@@ -57,6 +20,9 @@ NoticeQueue = Queue(1)
 # Alive upstream servers are put into this queue
 UpstreamQueue = Queue(100)
 
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 def make_connection(addr, bind_to=None, to_upstream=False):
     """
@@ -155,7 +121,7 @@ def check_alive(upstream):
         dest = make_connection(addr, None, True)
         # SSL enabled
         if dest and upstream['ssl']:
-            dest = ssl.wrap_socket(dest)
+            dest = ssl_context.wrap_socket(dest)
             logging.debug("Upstream %s is ALIVE", addr)
 
         if not dest:

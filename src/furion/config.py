@@ -7,10 +7,8 @@ import json
 from os.path import exists, dirname, basename, join, abspath
 from io import StringIO
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
+
 
 from .helpers import get_upstream_from_central
 from .simpleauth import SimpleAuth
@@ -69,8 +67,8 @@ class FurionConfig(object):
         default_cfg = StringIO(default_config)
 
         cls.config = ConfigParser()
-        cls.config.readfp(default_cfg)
-        cls.config.read(path)
+        cls.config.read_file(default_cfg)
+        cls.config.read_file(open(path))
         cls.config_dir = dirname(abspath(path))
 
         auth_plugin = cls.config.get('plugin', 'auth_plugin')

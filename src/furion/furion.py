@@ -48,7 +48,7 @@ def setup_server():
 
     if cfg.log_path:
         formatter = logging.Formatter(log_format)
-        log_handler = logging.handlers.RotatingFileHandler(cfg.log_path)
+        log_handler = logging.handlers.RotatingFileHandler(cfg.log_path, maxBytes=1024*1024*10, backupCount=5)
         log_handler.setFormatter(formatter)
         logger.addHandler(log_handler)
 
@@ -107,12 +107,12 @@ def setup_server():
 
     class FurionHandler(Socks5RequestHandler, cfg):
         pass
-    
+
     if cfg.local_ssl:
         svr = SecureSocks5Server(cfg.pem_path, cfg.local_addr, FurionHandler, cfg.with_systemd)
     else:
         svr = Socks5Server(cfg.local_addr, FurionHandler)
-    
+
     logging.info("Furion server listening on %s, SSL %s, AUTH %s." %
                     (cfg.local_addr, "ON" if cfg.local_ssl else "OFF", "ON" if cfg.local_auth else "OFF"))
 
@@ -122,12 +122,12 @@ def setup_server():
 def main():
     svr = setup_server()
     try:
-        svr.serve_forever()        
+        svr.serve_forever()
     except KeyboardInterrupt:
         print("Exiting...")
         svr.server_close()
         sys.exit()
-        
 
-if __name__ == "__main__":    
+
+if __name__ == "__main__":
     main()
