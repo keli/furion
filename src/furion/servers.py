@@ -4,6 +4,10 @@ import threading
 import socketserver
 from queue import Queue
 
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 socketserver.TCPServer.allow_reuse_address = True
 
 TIME_OUT = 30
@@ -57,7 +61,7 @@ class SecureTCPServer(socketserver.TCPServer):
         sock.settimeout(TIME_OUT)
 
         # Don't do handshake on connect for ssl (which will block http://bugs.python.org/issue1251)
-        self.socket = ssl.wrap_socket(sock, pem_path, pem_path, server_side=True, do_handshake_on_connect=False)
+        self.socket = ssl_context.wrap_socket(sock, pem_path, pem_path, server_side=True, do_handshake_on_connect=False)
         if not with_systemd:
             self.server_bind()
             self.server_activate()

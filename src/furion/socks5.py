@@ -8,6 +8,9 @@ import logging
 
 from .helpers import make_connection, my_inet_aton, hexstring, trigger_upstream_check
 
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 # ###################################
 # Constants
@@ -321,7 +324,7 @@ class Socks5Client:
         dest = make_connection(self.addr, self.bind_to, self.to_upstream)
         # SSL enabled
         if dest and self.enable_ssl:
-            dest = ssl.wrap_socket(dest)
+            dest = ssl_context.wrap_socket(dest)
 
         if not dest:
             trigger_upstream_check()
