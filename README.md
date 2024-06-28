@@ -33,7 +33,7 @@ To start using Furion, you need at least a furion.cfg file.
 
 By default, Furion will look for furion.cfg and upstream.json in `/etc/furion` or the current working directory. You can specify path to the configuration file after a `-c` switch.
 
-For client, an upstream.json file is also needed for upstream checking to work in the same directory your furion.cfg resides in. 
+For client, an upstream.json file is also needed for upstream checking to work in the same directory your furion.cfg resides in.
 
 Alternatively, you can put the upstream.json file somewhere accessible via http, so that you can share that address with your friends. Then configure the `upstream` section of your `furion.cfg` file like below, to use that upstream file.
 
@@ -49,10 +49,47 @@ Alternatively, you can put the upstream.json file somewhere accessible via http,
 
 Read configuration files in [examples](https://github.com/keli/furion/blob/master/examples) directory for more information.
 
-### Client For Windows
 
-There is a win32 binary available for download with every [release](https://github.com/keli/furion/releases).
+### Building Standalone Windows Clients
+
+* Install miniconda3
+```
+winget install miniconda3
+```
+
+* Create a new conda environment
+```
+conda create -n furion
+```
+
+* Activate the environment
+```
+conda activate furion
+```
+
+* Install pyinstaller
+```
+conda install -c conda-forge pyinstaller
+```
+
+* Install wxPython (optional if you only want to build the cli version)
+```
+conda install -c conda-forge wxpython
+```
+
+* Install furion itself
+```
+cd furion
+pip install -e .
+```
+
+* Build the standalone client
+```
+cd scripts/pyinstaller
+pyinstaller.bat
+```
+
+* The standalone clients will be in `dist/furion.exe` and `dist/furion-cli.exe`
+* Furion.exe is only a tray icon currently.
 
 Note: You need to put a config file `furion.cfg` in the same directory of the exe for it to work.
-
-If you want to build the windows client yourself, a python installation must be present, personally I used [ActivePython](http://www.activestate.com/activepython). You also need to install wxPython. Then install [pyinstaller](http://www.pyinstaller.org) to C:\\\\pyinstaller and use [pyinstaller.bat](https://github.com/keli/furion/blob/master/scripts/pyinstaller/pyinstaller.bat) to build.
