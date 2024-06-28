@@ -97,9 +97,6 @@ class DNSServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
     pass
 
 
-class RPCServer(socketserver.ThreadingMixIn, socketserver.UDPServer):
-    """UDP RPC Server"""
-    pass
 # Test server
 # svr = PingServer(('0.0.0.0', 8888), PingHandler)
 # svr.serve_forever(5)

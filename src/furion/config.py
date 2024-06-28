@@ -18,7 +18,6 @@ default_config = u"""
 [main]
 local_ip = 127.0.0.1
 local_port = 11080
-# rpc_port = 11081
 with_systemd = off
 local_ssl = off
 pem_path =
@@ -95,7 +94,6 @@ class FurionConfig(object):
         else:
             cls.allowed_ports = [int(port) for port in ports.split(',')]
 
-        # cls.rpc_port = cls.config.getint('main', 'rpc_port')
         cls.ping_server = cls.config.getboolean('main', 'ping_server')
         cls.ping_server_port = cls.config.getint('main', 'ping_server_port')
         cls.dns_server = cls.config.getboolean('main', 'dns_server')

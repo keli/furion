@@ -7,7 +7,6 @@ from os.path import exists
 from .socks5 import *
 from .ping import PingHandler
 from .dns import *
-from .rpc import *
 from .config import FurionConfig as cfg
 from .helpers import *
 from .servers import *
@@ -91,14 +90,6 @@ def setup_server():
         thr = threading.Thread(target=dns_proxy.serve_forever, args=())
         thr.setDaemon(1)
         thr.start()
-
-    # Start RPC server
-    # class RPCHandler(RPCRequestHandler, cfg):
-    #     pass
-    # rpc_svr = RPCServer((cfg.local_ip, cfg.rpc_port), RPCHandler)
-    # thr = threading.Thread(target=rpc_svr.serve_forever, args=())
-    # thr.setDaemon(1)
-    # thr.start()
 
     # Re-check upstream every 30 minutes
     thr = threading.Thread(target=check_upstream_repeatedly, args=(1800,))
