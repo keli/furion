@@ -1,12 +1,12 @@
-furion.egg-info/*
+furion.egg-info/
 furion.cfg
 furion.log
 upstream.json
-build/*
-dist/*
+build/
+dist/
 *.pyc
 .DS_Store
-.idea/*
+.idea/
 *.bak
 *.orig
 .python-version

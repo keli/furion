@@ -1,6 +1,6 @@
 # -*- mode: python -*-
-a = Analysis(['..\\cli.py'],
-             pathex=['C:\\furion\\pyinstaller'],
+a = Analysis(['..\\..\\cli.py'],
+             pathex=['.'],
              hiddenimports=[],
              hookspath=None)
 a.datas += [('furion.ico', '.\\furion.ico', 'DATA')]
