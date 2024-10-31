@@ -1,20 +1,14 @@
-from __future__ import with_statement, print_function
-
-import time
-import sys
 import json
-
-from os.path import exists, dirname, basename, join, abspath
-from io import StringIO
-
+import sys
+import time
 from configparser import ConfigParser
-
+from io import StringIO
+from os.path import abspath, basename, dirname, exists, join
 
 from .helpers import get_upstream_from_central
 from .simpleauth import SimpleAuth
 
-
-default_config = u"""
+default_config = """
 [main]
 local_ip = 127.0.0.1
 local_port = 11080
@@ -62,7 +56,6 @@ class FurionConfig(object):
 
     @classmethod
     def init(cls, path):
-
         default_cfg = StringIO(default_config)
 
         cls.config = ConfigParser()
@@ -70,46 +63,54 @@ class FurionConfig(object):
         cls.config.read_file(open(path))
         cls.config_dir = dirname(abspath(path))
 
-        auth_plugin = cls.config.get('plugin', 'auth_plugin')
+        auth_plugin = cls.config.get("plugin", "auth_plugin")
 
         cls.authority = None
-        if auth_plugin == 'simpleauth':
-            cls.password_path = cls.get_path(cls.config.get('simpleauth', 'password_path'))
+        if auth_plugin == "simpleauth":
+            cls.password_path = cls.get_path(
+                cls.config.get("simpleauth", "password_path")
+            )
             cls.authority = SimpleAuth(cls.password_path)
 
-        cls.local_ip = cls.config.get('main', 'local_ip')
-        cls.local_port = cls.config.getint('main', 'local_port')
-        cls.with_systemd = cls.config.getboolean('main', 'with_systemd')
+        cls.local_ip = cls.config.get("main", "local_ip")
+        cls.local_port = cls.config.getint("main", "local_port")
+        cls.with_systemd = cls.config.getboolean("main", "with_systemd")
 
-        cls.local_ssl = cls.config.getboolean('main', 'local_ssl')
-        cls.local_auth = cls.config.getboolean('main', 'local_auth')
-        cls.pem_path = cls.get_path(cls.config.get('main', 'pem_path'))
+        cls.local_ssl = cls.config.getboolean("main", "local_ssl")
+        cls.local_auth = cls.config.getboolean("main", "local_auth")
+        cls.pem_path = cls.get_path(cls.config.get("main", "pem_path"))
         if cls.pem_path and not exists(cls.pem_path):
             print('Fatal error: pem "%s" cannot be found.' % cls.pem_path)
             time.sleep(3)
             sys.exit(-1)
-        ports = cls.config.get('main', 'allowed_ports').strip()
-        if ports == 'all' or ports == '':
+        ports = cls.config.get("main", "allowed_ports").strip()
+        if ports == "all" or ports == "":
             cls.allowed_ports = []
         else:
-            cls.allowed_ports = [int(port) for port in ports.split(',')]
+            cls.allowed_ports = [int(port) for port in ports.split(",")]
 
-        cls.ping_server = cls.config.getboolean('main', 'ping_server')
-        cls.ping_server_port = cls.config.getint('main', 'ping_server_port')
-        cls.dns_server = cls.config.getboolean('main', 'dns_server')
-        cls.dns_server_port = cls.config.getint('main', 'dns_server_port')
-        cls.remote_tcp_dns = cls.config.get('main', 'remote_tcp_dns')
-        cls.log_level = cls.config.getint('main', 'log_level')
-        cls.log_path = cls.get_path(cls.config.get('main', 'log_path'))
+        cls.ping_server = cls.config.getboolean("main", "ping_server")
+        cls.ping_server_port = cls.config.getint("main", "ping_server_port")
+        cls.dns_server = cls.config.getboolean("main", "dns_server")
+        cls.dns_server_port = cls.config.getint("main", "dns_server_port")
+        cls.remote_tcp_dns = cls.config.get("main", "remote_tcp_dns")
+        cls.log_level = cls.config.getint("main", "log_level")
+        cls.log_path = cls.get_path(cls.config.get("main", "log_path"))
 
-        cls.central_url = cls.config.get('upstream', 'central_url')
-        cls.autoupdate_upstream_list = cls.config.getboolean('upstream', 'autoupdate_upstream_list')
-        cls.update_frequency = cls.config.get('upstream', 'update_frequency')
-        cls.upstream_list_path = cls.get_path(cls.config.get('upstream', 'upstream_list_path'))
+        cls.central_url = cls.config.get("upstream", "central_url")
+        cls.autoupdate_upstream_list = cls.config.getboolean(
+            "upstream", "autoupdate_upstream_list"
+        )
+        cls.update_frequency = cls.config.get("upstream", "update_frequency")
+        cls.upstream_list_path = cls.get_path(
+            cls.config.get("upstream", "upstream_list_path")
+        )
 
         cls.upstream_list = None
         if exists(cls.upstream_list_path):
-            cls.upstream_list = json.loads(open(cls.upstream_list_path).read())['upstream_list']
+            cls.upstream_list = json.loads(open(cls.upstream_list_path).read())[
+                "upstream_list"
+            ]
         elif cls.autoupdate_upstream_list:
             get_upstream_from_central(cls)
         # cls.upstream_ip = cls.config.get('upstream', 'upstream_ip')

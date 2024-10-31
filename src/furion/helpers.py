@@ -1,14 +1,13 @@
-import os
+import json
 import logging
+import os
 import socket
-import time
 import ssl
 import threading
-
-from urllib.request import urlopen, Request
-import json
-
+import time
 from queue import Queue
+from urllib.request import Request, urlopen
+
 from .ping import ping
 
 MIN_INTERVAL = 30
@@ -23,6 +22,7 @@ UpstreamQueue = Queue(100)
 ssl_context = ssl.create_default_context()
 ssl_context.check_hostname = False
 ssl_context.verify_mode = ssl.CERT_NONE
+
 
 def make_connection(addr, bind_to=None, to_upstream=False):
     """
@@ -54,20 +54,22 @@ def make_connection(addr, bind_to=None, to_upstream=False):
         except Exception as e:
             if client is not None:
                 client.close()
-            logging.debug("Error occurred when making connection to dest %s: %s", addr, e)
+            logging.debug(
+                "Error occurred when making connection to dest %s: %s", addr, e
+            )
             return None
 
 
 def set_upstream(cfg, upstream):
-    cfg.upstream_addr = upstream['ip'], upstream['port']
-    cfg.upstream_auth = upstream['auth']
-    cfg.upstream_ssl = upstream['ssl']
-    cfg.upstream_username = upstream['username']
-    cfg.upstream_password = upstream['password']
+    cfg.upstream_addr = upstream["ip"], upstream["port"]
+    cfg.upstream_auth = upstream["auth"]
+    cfg.upstream_ssl = upstream["ssl"]
+    cfg.upstream_username = upstream["username"]
+    cfg.upstream_password = upstream["password"]
 
 
-def get_upstream_from_central(cfg, timing='now'):
-    if timing == 'weekly':
+def get_upstream_from_central(cfg, timing="now"):
+    if timing == "weekly":
         st = os.stat(cfg.upstream_list_path)
         if time.time() - st.st_mtime < 86400 * 7:
             logging.info("Ignore request to get upstream from central...")
@@ -76,13 +78,13 @@ def get_upstream_from_central(cfg, timing='now'):
         try:
             logging.info("Fetching upstream from central...")
             jsonstr = urlopen(cfg.central_url).read()
-            jsonstr = jsonstr.decode('utf-8')
-            cfg.upstream_list = json.loads(jsonstr)['upstream_list']
+            jsonstr = jsonstr.decode("utf-8")
+            cfg.upstream_list = json.loads(jsonstr)["upstream_list"]
         except Exception as e:
             logging.exception("Failed to fetch upstream from central")
         else:
             logging.info("Saving upstream list...")
-            open(cfg.upstream_list_path, 'w').write(jsonstr)
+            open(cfg.upstream_list_path, "w").write(jsonstr)
             return True
     else:
         logging.fatal("No central_url is configured or autoupdate is off.")
@@ -90,8 +92,7 @@ def get_upstream_from_central(cfg, timing='now'):
 
 
 def run_check(cfg):
-    """ Check alive upstream servers
-    """
+    """Check alive upstream servers"""
     if not cfg.upstream_list:
         get_upstream_from_central(cfg)
     else:
@@ -99,16 +100,18 @@ def run_check(cfg):
         if not cfg.upstream_addr:
             set_upstream(cfg, cfg.upstream_list[0])
 
-        if cfg.update_frequency == 'start':
+        if cfg.update_frequency == "start":
             get_upstream_from_central(cfg)
-        elif cfg.update_frequency == 'weekly':
-            get_upstream_from_central(cfg, 'weekly')
+        elif cfg.update_frequency == "weekly":
+            get_upstream_from_central(cfg, "weekly")
 
     while True:
         ts = NoticeQueue.get()
         diff = ts - cfg.last_update
         if cfg.last_update == 0 or diff > MIN_INTERVAL:
-            logging.info("Last check %d seconds ago, checking for live upstream...", diff)
+            logging.info(
+                "Last check %d seconds ago, checking for live upstream...", diff
+            )
             for upstream in cfg.upstream_list:
                 t = threading.Thread(target=check_alive, args=(upstream,))
                 t.start()
@@ -117,10 +120,10 @@ def run_check(cfg):
 def check_alive(upstream):
     dest = None
     try:
-        addr = (upstream['ip'], upstream['port'])
+        addr = (upstream["ip"], upstream["port"])
         dest = make_connection(addr, None, True)
         # SSL enabled
-        if dest and upstream['ssl']:
+        if dest and upstream["ssl"]:
             dest = ssl_context.wrap_socket(dest)
             logging.debug("Upstream %s is ALIVE", addr)
 
@@ -132,23 +135,23 @@ def check_alive(upstream):
         logging.debug("Upstream %s is DEAD: %s", addr, e)
         return
     try:
-        ping_port = upstream['ping_port'] if 'ping_port' in upstream else 17777
-        score = ping((upstream['ip'], ping_port))
-        upstream['ping'] = score
+        ping_port = upstream["ping_port"] if "ping_port" in upstream else 17777
+        score = ping((upstream["ip"], ping_port))
+        upstream["ping"] = score
         UpstreamQueue.put((time.time(), upstream))
     except Exception as e:
-        logging.debug("Ping to %s failed: %s", (upstream['ip'], ping_port), e)
+        logging.debug("Ping to %s failed: %s", (upstream["ip"], ping_port), e)
 
 
 def update_upstream(cfg):
     while True:
         ts, upstream = UpstreamQueue.get()
         if cfg.last_update == 0 or ts - cfg.last_update > MIN_INTERVAL:
-            logging.info("Setting upstream to: %s", (upstream['ip'], upstream['port']))
+            logging.info("Setting upstream to: %s", (upstream["ip"], upstream["port"]))
             cfg.last_update = ts
             set_upstream(cfg, upstream)
         else:
-            logging.debug("Upstream %s is not used", (upstream['ip'], upstream['port']))
+            logging.debug("Upstream %s is not used", (upstream["ip"], upstream["port"]))
 
 
 def trigger_upstream_check():
@@ -163,7 +166,8 @@ def check_upstream_repeatedly(seconds):
 
 
 # Some versions of windows don't have socket.inet_pton
-if hasattr(socket, 'inet_pton'):
+if hasattr(socket, "inet_pton"):
+
     def my_inet_aton(ip_string):
         af, _, _, _, _ = socket.getaddrinfo(ip_string, 80, 0, socket.SOCK_STREAM)[0]
         return socket.inet_pton(af, ip_string)
@@ -172,7 +176,7 @@ else:
 
 
 def hexstring(s):
-    return ' '.join(['%02X' % ord(c) for c in s])
+    return " ".join(["%02X" % ord(c) for c in s])
 
 
 # http://stackoverflow.com/a/14620633/1349791

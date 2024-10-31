@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
-import sys
 import getopt
 import logging.handlers
+import sys
 from os.path import exists
-from .socks5 import *
-from .ping import PingHandler
-from .dns import *
+
 from .config import FurionConfig as cfg
+from .dns import *
 from .helpers import *
+from .ping import PingHandler
 from .servers import *
+from .socks5 import *
 
 
 def usage():
-    print('Usage: furion -c <furion.cfg>')
+    print("Usage: furion -c <furion.cfg>")
 
 
 def setup_server():
-    config_path = 'furion.cfg' if exists('furion.cfg') else '/etc/furion/furion.cfg'
+    config_path = "furion.cfg" if exists("furion.cfg") else "/etc/furion/furion.cfg"
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hc:")
@@ -32,8 +33,8 @@ def setup_server():
             sys.exit()
 
     # Initialize logger
-    log_format = '%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
-    logging.basicConfig(format=log_format, filemode='w')
+    log_format = "%(asctime)s [%(filename)s:%(lineno)d][%(levelname)s] %(message)s"
+    logging.basicConfig(format=log_format, filemode="w")
 
     logger = logging.getLogger()
 
@@ -47,7 +48,9 @@ def setup_server():
 
     if cfg.log_path:
         formatter = logging.Formatter(log_format)
-        log_handler = logging.handlers.RotatingFileHandler(cfg.log_path, maxBytes=1024*1024*10, backupCount=5)
+        log_handler = logging.handlers.RotatingFileHandler(
+            cfg.log_path, maxBytes=1024 * 1024 * 10, backupCount=5
+        )
         log_handler.setFormatter(formatter)
         logger.addHandler(log_handler)
 
@@ -56,14 +59,15 @@ def setup_server():
     try:
         import gevent
         import gevent.monkey
+
         gevent.monkey.patch_all()
     except ImportError:
         gevent = None
 
     if gevent:
-        logging.info('Using gevent model...')
+        logging.info("Using gevent model...")
     else:
-        logging.info('Using threading model...')
+        logging.info("Using threading model...")
 
     if cfg.upstream_list:
         # Setup threads for upstream checking
@@ -84,8 +88,10 @@ def setup_server():
 
     # Start UDP DNS server
     if cfg.dns_server:
+
         class DNSHandler(DNSQueryHandler, cfg):
             pass
+
         dns_proxy = DNSServer((cfg.local_ip, cfg.dns_server_port), DNSHandler)
         thr = threading.Thread(target=dns_proxy.serve_forever, args=())
         thr.setDaemon(1)
@@ -100,12 +106,20 @@ def setup_server():
         pass
 
     if cfg.local_ssl:
-        svr = SecureSocks5Server(cfg.pem_path, cfg.local_addr, FurionHandler, cfg.with_systemd)
+        svr = SecureSocks5Server(
+            cfg.pem_path, cfg.local_addr, FurionHandler, cfg.with_systemd
+        )
     else:
         svr = Socks5Server(cfg.local_addr, FurionHandler)
 
-    logging.info("Furion server listening on %s, SSL %s, AUTH %s." %
-                    (cfg.local_addr, "ON" if cfg.local_ssl else "OFF", "ON" if cfg.local_auth else "OFF"))
+    logging.info(
+        "Furion server listening on %s, SSL %s, AUTH %s."
+        % (
+            cfg.local_addr,
+            "ON" if cfg.local_ssl else "OFF",
+            "ON" if cfg.local_auth else "OFF",
+        )
+    )
 
     return svr
 
