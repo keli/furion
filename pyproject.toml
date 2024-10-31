@@ -1,29 +1,34 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "furion"
-version = "1.5.2"
+dynamic = ["version"]
 description = "A socks5 proxy with ssl support"
-authors = [
-    {name = "Keli Hu", email = "dev@keli.hu"},
-]
+authors = [{ name = "Keli Hu", email = "dev@keli.hu" }]
 dependencies = []
 requires-python = ">=3.8"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 keywords = ["socks5 proxy ssl"]
 
 [project.urls]
 Homepage = "https://github.com/keli/furion"
 
 [project.optional-dependencies]
-dev = [
-    "check-manifest",
-]
-test = [
-    "coverage",
-]
+dev = ["check-manifest"]
+test = ["coverage"]
 
 [project.scripts]
 furion = "furion.furion:main"
 
 [tool.pdm]
 distribution = true
+
+[tool.setuptools_scm]
+local_scheme = 'no-local-version'
+version_scheme = "post-release"
+
+[tool.setuptools.dynamic]
+version = { attr = "setuptools_scm.get_version" }
